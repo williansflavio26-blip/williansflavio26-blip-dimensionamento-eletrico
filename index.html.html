@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#060a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ NBR 5410 — Dimensionamento Elétrico</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060a0f;
+    --bg2: #0b1018;
+    --bg3: #111822;
+    --panel: #0d1520;
+    --border: #1a2d45;
+    --accent: #00d4ff;
+    --accent2: #ff6b00;
+    --accent3: #39ff14;
+    --accent4: #f7c948;
+    --solar: #ffd700;
+    --solar2: #ff8c00;
+    --nr12: #b84fff;
+    --warn: #ffcc00;
+    --danger: #ff2244;
+    --text: #c8dde8;
+    --text2: #7090a0;
+    --glow: 0 0 12px rgba(0,212,255,0.4);
+    --glow2: 0 0 12px rgba(255,107,0,0.4);
+    --glow3: 0 0 12px rgba(57,255,20,0.4);
+    --glow-solar: 0 0 12px rgba(255,215,0,0.5);
+    --glow-nr12: 0 0 12px rgba(184,79,255,0.4);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events:none;
+    z-index:9999;
+  }
+  h1,h2,h3 { font-family:'Orbitron',monospace; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #040810 0%, #0a1520 50%, #040810 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 20px;
+    display:flex; align-items:center; gap:16px;
+    box-shadow: 0 4px 30px rgba(0,212,255,0.2);
+    position: sticky; top:0; z-index:100;
+    flex-wrap:wrap;
+  }
+  .header-logo { font-size:28px; }
+  .header-title { flex:1; min-width:160px; }
+  .header-title h1 { font-size:16px; color:var(--accent); letter-spacing:3px; text-shadow: var(--glow); }
+  .header-title p { font-size:11px; color:var(--text2); letter-spacing:1px; font-family:'Share Tech Mono'; }
+  .norma-badges { display:flex; gap:6px; flex-wrap:wrap; }
+  .norma-badge {
+    padding:4px 10px; border-radius:4px;
+    font-family:'Orbitron'; font-size:10px; font-weight:700;
+    letter-spacing:1px;
+  }
+  .nb-blue  { background:linear-gradient(135deg,#00558a,#0099cc); color:#fff; box-shadow:var(--glow); }
+  .nb-orange{ background:linear-gradient(135deg,#aa4400,#ff6b00); color:#fff; box-shadow:var(--glow2); }
+  .nb-green { background:linear-gradient(135deg,#006600,#39ff14); color:#000; box-shadow:var(--glow3); }
+  .nb-solar { background:linear-gradient(135deg,#996600,#ffd700); color:#000; box-shadow:var(--glow-solar); }
+  .nb-nr12  { background:linear-gradient(135deg,#5500aa,#b84fff); color:#fff; box-shadow:var(--glow-nr12); }
+
+  /* TABS */
+  .tabs {
+    display:flex; gap:2px; background:var(--bg2);
+    border-bottom:2px solid var(--border);
+    overflow-x:auto;
+  }
+  .tab {
+    padding:12px 16px; cursor:pointer; font-family:'Orbitron'; font-size:10px;
+    letter-spacing:1px; color:var(--text2); border-bottom:3px solid transparent;
+    white-space:nowrap; transition:all .2s; background:transparent; border-top:none; border-left:none; border-right:none;
+  }
+  .tab:hover { color:var(--accent); background:rgba(0,212,255,0.05); }
+  .tab.active  { color:var(--accent);  border-bottom-color:var(--accent);  background:rgba(0,212,255,0.08); }
+  .tab.active2 { color:var(--accent2); border-bottom-color:var(--accent2); background:rgba(255,107,0,0.08); }
+  .tab.tab-solar.active { color:var(--solar); border-bottom-color:var(--solar); background:rgba(255,215,0,0.08); }
+
+  /* SECTIONS */
+  .section { display:none; padding:20px; max-width:1000px; margin:0 auto; }
+  .section.active { display:block; }
+
+  /* CARDS */
+  .card {
+    background: var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:20px;
+    margin-bottom:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before {
+    content:'';
+    position:absolute;top:0;left:0;right:0;height:2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .card.orange::before { background: linear-gradient(90deg, transparent, var(--accent2), transparent); }
+  .card.green::before  { background: linear-gradient(90deg, transparent, var(--accent3), transparent); }
+  .card.warn::before   { background: linear-gradient(90deg, transparent, var(--warn), transparent); }
+  .card.solar::before  { background: linear-gradient(90deg, transparent, var(--solar), transparent); }
+  .card.nr12::before   { background: linear-gradient(90deg, transparent, var(--nr12), transparent); }
+
+  .card-title {
+    font-family:'Orbitron'; font-size:13px; letter-spacing:2px;
+    color:var(--accent); margin-bottom:16px; display:flex; align-items:center; gap:8px;
+  }
+  .card-title.orange { color:var(--accent2); }
+  .card-title.green  { color:var(--accent3); }
+  .card-title.warn   { color:var(--warn); }
+  .card-title.solar  { color:var(--solar); }
+  .card-title.nr12   { color:var(--nr12); }
+
+  /* GRID */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  @media(max-width:600px) { .grid2,.grid3 { grid-template-columns:1fr; } }
+
+  /* INPUTS */
+  .field { margin-bottom:14px; }
+  .field label {
+    display:block; font-family:'Share Tech Mono'; font-size:11px;
+    color:var(--text2); letter-spacing:2px; margin-bottom:6px;
+  }
+  .field input, .field select {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    color:var(--text); padding:10px 14px; border-radius:4px;
+    font-family:'Share Tech Mono'; font-size:14px;
+    transition:border .2s;
+    -webkit-appearance:none;
+  }
+  .field input:focus, .field select:focus {
+    outline:none; border-color:var(--accent);
+    box-shadow: 0 0 8px rgba(0,212,255,0.2);
+  }
+  .field select option { background:var(--bg3); }
+
+  /* BUTTONS */
+  .btn {
+    padding:12px 24px; border:none; border-radius:4px; cursor:pointer;
+    font-family:'Orbitron'; font-size:12px; letter-spacing:2px; font-weight:700;
+    transition:all .2s;
+  }
+  .btn-primary { background: linear-gradient(135deg, #0066aa, #00aadd); color:#fff; box-shadow: var(--glow); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.5); }
+  .btn-orange { background: linear-gradient(135deg, #aa4400, #ff6b00); color:#fff; box-shadow: var(--glow2); }
+  .btn-green  { background: linear-gradient(135deg, #006600, #39ff14); color:#000; box-shadow: var(--glow3); }
+  .btn-warn   { background: linear-gradient(135deg, #996600, #ffcc00); color:#000; }
+  .btn-solar  { background: linear-gradient(135deg, #996600, #ffd700); color:#000; box-shadow: var(--glow-solar); }
+  .btn-nr12   { background: linear-gradient(135deg, #5500aa, #b84fff); color:#fff; box-shadow: var(--glow-nr12); }
+  .btn-sm { padding:8px 16px; font-size:10px; }
+  .btn-danger { background:linear-gradient(135deg,#880022,#ff2244); color:#fff; }
+
+  /* RESULTS */
+  .result-box {
+    background: rgba(0,20,10,0.6);
+    border:1px solid var(--accent3);
+    border-radius:6px; padding:16px; margin-top:14px;
+  }
+  .result-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+    font-family:'Share Tech Mono';
+  }
+  .result-row:last-child { border-bottom:none; }
+  .result-label { color:var(--text2); font-size:12px; }
+  .result-value { color:var(--accent3); font-size:14px; font-weight:700; }
+  .result-value.warn   { color:var(--warn); }
+  .result-value.orange { color:var(--accent2); }
+  .result-value.accent { color:var(--accent); }
+  .result-value.solar  { color:var(--solar); }
+
+  /* STEPS */
+  .steps { margin-top:12px; }
+  .step { display:flex; gap:12px; margin-bottom:10px; font-family:'Share Tech Mono'; font-size:13px; }
+  .step-num {
+    background:var(--accent2); color:#000; font-weight:700;
+    width:24px; height:24px; border-radius:3px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; font-size:11px;
+  }
+  .step-num.solar { background:var(--solar); }
+  .step-num.nr12  { background:var(--nr12); color:#fff; }
+  .step-text { color:var(--text); line-height:1.6; }
+  .step-text span { color:var(--accent3); font-weight:700; }
+
+  /* CHECKLIST NR-12 */
+  .checklist { list-style:none; padding:0; }
+  .checklist li {
+    display:flex; align-items:flex-start; gap:10px; padding:8px 0;
+    border-bottom:1px solid rgba(184,79,255,0.1);
+    font-family:'Share Tech Mono'; font-size:12px; color:var(--text2); line-height:1.6;
+  }
+  .checklist li:last-child { border-bottom:none; }
+  .checklist li::before { content:'■'; color:var(--nr12); flex-shrink:0; margin-top:2px; }
+  .checklist li strong { color:var(--nr12); }
+
+  /* ELETRODOMÉSTICO ITEM */
+  .eletro-item {
+    display:flex; align-items:center; gap:12px; padding:10px;
+    border:1px solid var(--border); border-radius:6px; margin-bottom:8px;
+    background:var(--bg3);
+  }
+  .eletro-item input[type=checkbox] { width:18px; height:18px; accent-color:var(--accent); cursor:pointer; }
+  .eletro-info { flex:1; }
+  .eletro-name { font-family:'Rajdhani'; font-weight:600; font-size:15px; }
+  .eletro-spec { font-family:'Share Tech Mono'; font-size:11px; color:var(--text2); }
+  .eletro-power { font-family:'Orbitron'; font-size:13px; color:var(--accent2); font-weight:700; }
+  .eletro-custom-w { width:80px; background:var(--bg2); border:1px solid var(--border); color:var(--text); padding:4px 8px; border-radius:3px; font-family:'Share Tech Mono'; font-size:13px; }
+
+  /* MATERIAL LIST */
+  .mat-table { width:100%; border-collapse:collapse; font-family:'Share Tech Mono'; font-size:13px; }
+  .mat-table th { background:var(--bg2); color:var(--accent); font-family:'Orbitron'; font-size:10px; letter-spacing:2px; padding:10px; text-align:left; border-bottom:2px solid var(--border); }
+  .mat-table td { padding:10px; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .mat-table tr:hover td { background:rgba(0,212,255,0.04); }
+  .mat-table .qty  { color:var(--accent3); font-weight:700; }
+  .mat-table .unit { color:var(--text2); }
+  .mat-table .item { color:var(--text); }
+  .mat-table .norm { color:var(--warn); font-size:11px; }
+
+  /* PLANTA */
+  .ambiente-item { border:1px solid var(--border); border-radius:6px; padding:14px; margin-bottom:10px; background:var(--bg3); }
+  .ambiente-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .ambiente-name { font-family:'Orbitron'; font-size:12px; color:var(--accent); }
+  .ambiente-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media(max-width:500px) { .ambiente-grid { grid-template-columns:1fr 1fr; } }
+
+  /* SOLAR DIAGRAM */
+  .solar-diagram {
+    background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.2);
+    border-radius:8px; padding:16px; margin-bottom:16px;
+    font-family:'Share Tech Mono'; font-size:12px; line-height:1.8;
+  }
+  .solar-flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .solar-block {
+    background:rgba(255,215,0,0.15); border:1px solid rgba(255,215,0,0.4);
+    border-radius:4px; padding:6px 12px; font-size:11px; color:var(--solar); font-weight:700;
+  }
+  .solar-arrow { color:var(--solar); font-size:16px; }
+
+  /* PRINT */
+  @media print {
+    body { background:#fff; color:#000; }
+    body::before { display:none; }
+    .header { background:#000; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .tabs, .btn, .no-print { display:none !important; }
+    .section { display:block !important; padding:0; }
+    .card { border:1px solid #ccc; background:#fff; }
+    .card::before { display:none; }
+    .card-title { color:#000; }
+    .result-value { color:#000; }
+    .mat-table th { background:#eee; color:#000; }
+    .mat-table td { color:#000; }
+    .step-text { color:#000; }
+    .step-num { background:#ff6b00; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+
+  /* TAGS */
+  .tag { display:inline-block; padding:3px 8px; border-radius:3px; font-size:11px; font-family:'Share Tech Mono'; letter-spacing:1px; margin:2px; }
+  .tag-blue  { background:rgba(0,212,255,0.15); color:var(--accent); border:1px solid rgba(0,212,255,0.3); }
+  .tag-orange{ background:rgba(255,107,0,0.15); color:var(--accent2); border:1px solid rgba(255,107,0,0.3); }
+  .tag-green { background:rgba(57,255,20,0.15); color:var(--accent3); border:1px solid rgba(57,255,20,0.3); }
+  .tag-warn  { background:rgba(255,204,0,0.15); color:var(--warn); border:1px solid rgba(255,204,0,0.3); }
+  .tag-solar { background:rgba(255,215,0,0.15); color:var(--solar); border:1px solid rgba(255,215,0,0.4); }
+  .tag-nr12  { background:rgba(184,79,255,0.15); color:var(--nr12); border:1px solid rgba(184,79,255,0.3); }
+
+  /* INFO BOX */
+  .info-box {
+    background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2);
+    border-radius:6px; padding:12px 16px; margin-bottom:14px;
+    font-family:'Share Tech Mono'; font-size:12px; color:var(--text2); line-height:1.8;
+  }
+  .info-box.warn  { background:rgba(255,204,0,0.05); border-color:rgba(255,204,0,0.2); }
+  .info-box.solar { background:rgba(255,215,0,0.05); border-color:rgba(255,215,0,0.3); }
+  .info-box.nr12  { background:rgba(184,79,255,0.05); border-color:rgba(184,79,255,0.3); }
+  .info-box.danger{ background:rgba(255,34,68,0.05); border-color:rgba(255,34,68,0.3); }
+
+  .sep { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+  .total-box {
+    background: linear-gradient(135deg, rgba(57,255,20,0.1), rgba(0,212,255,0.1));
+    border:2px solid var(--accent3); border-radius:8px; padding:20px; margin-top:16px;
+    text-align:center;
+  }
+  .total-box.solar { background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,140,0,0.1)); border-color:var(--solar); }
+  .total-label { font-family:'Share Tech Mono'; font-size:12px; color:var(--text2); letter-spacing:2px; }
+  .total-value { font-family:'Orbitron'; font-size:32px; color:var(--accent3); font-weight:900; text-shadow: var(--glow3); margin:8px 0; }
+  .total-value.solar { color:var(--solar); text-shadow:var(--glow-solar); }
+  .total-sub { font-family:'Share Tech Mono'; font-size:12px; color:var(--text2); }
+
+  .tip { position:relative; display:inline-block; cursor:help; }
+  .tip::after {
+    content:attr(data-tip);
+    position:absolute; bottom:120%; left:50%; transform:translateX(-50%);
+    background:var(--bg3); border:1px solid var(--border); border-radius:4px;
+    padding:6px 10px; font-family:'Share Tech Mono'; font-size:11px; color:var(--text);
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s; z-index:10;
+  }
+  .tip:hover::after { opacity:1; }
+
+  .flex-row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  .flex-1 { flex:1; }
+
+  .section-title {
+    font-family:'Orbitron'; font-size:16px; color:var(--accent); letter-spacing:3px;
+    margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .section-title.solar { color:var(--solar); }
+  .section-title.nr12  { color:var(--nr12); }
+
+  .badge-nbr {
+    font-family:'Share Tech Mono'; font-size:10px; background:rgba(255,107,0,0.2);
+    border:1px solid var(--accent2); color:var(--accent2); padding:2px 8px; border-radius:3px;
+  }
+  .badge-solar { font-family:'Share Tech Mono'; font-size:10px; background:rgba(255,215,0,0.15); border:1px solid var(--solar); color:var(--solar); padding:2px 8px; border-radius:3px; }
+  .badge-nr12  { font-family:'Share Tech Mono'; font-size:10px; background:rgba(184,79,255,0.15); border:1px solid var(--nr12); color:var(--nr12); padding:2px 8px; border-radius:3px; }
+</style>
+<style>
+.btn-back {
+  position: fixed; top: 14px; left: 14px; z-index: 99999;
+  background: rgba(6,10,15,0.92); border: 1px solid #1a2d45; border-radius: 50px;
+  color: #c8dde8; font-family: 'Orbitron', monospace; font-size: 0.7rem; font-weight: 700;
+  padding: 8px 16px 8px 12px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  backdrop-filter: blur(8px); transition: all .2s; text-decoration: none; letter-spacing: 1px;
+}
+.btn-back:hover { border-color: #00d4ff; color: #00d4ff; }
+</style>
+</head>
+<body>
+<a class="btn-back" href="index.html">← Menu</a>
+
+<div class="header">
+  <div class="header-logo">⚡</div>
+  <div class="header-title">
+    <h1>DIMENSIONAMENTO ELÉTRICO</h1>
+    <p>RESIDENCIAL · INDUSTRIAL · FOTOVOLTAICO</p>
+  </div>
+  <div class="norma-badges">
+    <span class="norma-badge nb-blue">NBR 5410</span>
+    <span class="norma-badge nb-orange">NR-10</span>
+    <span class="norma-badge nb-nr12">NR-12</span>
+    <span class="norma-badge nb-solar">NBR 16690</span>
+    <span class="norma-badge nb-green">NBR 5419</span>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active"      onclick="showTab('planta')">🏠 PLANTA</button>
+  <button class="tab"             onclick="showTab('eletros')">🔌 ELETRODOMÉSTICOS</button>
+  <button class="tab"             onclick="showTab('circuitos')">⚡ CIRCUITOS</button>
+  <button class="tab"             onclick="showTab('dimensionamento')">📐 DIMENSIONAMENTO</button>
+  <button class="tab"             onclick="showTab('materiais')">📋 MATERIAIS</button>
+  <button class="tab"             onclick="showTab('industrial')">🏭 INDUSTRIAL</button>
+  <button class="tab tab-solar"   onclick="showTab('fotovoltaico')">☀️ FOTOVOLTAICO</button>
+</div>
+
+<!-- ===================== PLANTA ===================== -->
+<div id="sec-planta" class="section active">
+  <div class="section-title">🏠 DADOS DA PLANTA RESIDENCIAL <span class="badge-nbr">NBR 5410</span></div>
+
+  <div class="card warn">
+    <div class="card-title warn">⚠️ NORMAS APLICÁVEIS — ESTA INSTALAÇÃO</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      <span class="tag tag-blue">NBR 5410:2004</span>
+      <span class="tag tag-orange">NR-10 (Segurança)</span>
+      <span class="tag tag-nr12">NR-12 (Máquinas)</span>
+      <span class="tag tag-solar">NBR 16690 (FV)</span>
+      <span class="tag tag-green">NBR 5419 (SPDA)</span>
+      <span class="tag tag-warn">NBR 14136 (Plugues)</span>
+    </div>
+    <div class="info-box warn" style="margin-bottom:0;">
+      ⚠️ Esta calculadora é orientativa. Toda instalação elétrica deve ser executada e assinada por profissional habilitado (CREA/ART). As normas NBR 5410, NR-10, NR-12 e NBR 16690 são obrigatórias conforme o tipo de instalação.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ CONFIGURAÇÃO GERAL</div>
+    <div class="grid2">
+      <div class="field">
+        <label>TIPO DA INSTALAÇÃO</label>
+        <select id="tipo-inst">
+          <option value="residencial">Residencial</option>
+          <option value="comercial">Comercial</option>
+          <option value="industrial">Industrial</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>TENSÃO DA REDE (V)</label>
+        <select id="tensao-rede">
+          <option value="127">127V (Monofásico)</option>
+          <option value="220" selected>220V (Bifásico/Monofásico)</option>
+          <option value="380">380V (Trifásico)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>ÁREA TOTAL DA RESIDÊNCIA (m²)</label>
+        <input type="number" id="area-total" value="100" placeholder="ex: 100">
+      </div>
+      <div class="field">
+        <label>PADRÃO DA ENTRADA (A)</label>
+        <select id="padrao-entrada">
+          <option value="25">25A — Monofásico</option>
+          <option value="40" selected>40A — Bifásico</option>
+          <option value="63">63A — Trifásico</option>
+          <option value="100">100A — Trifásico</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card orange">
+    <div class="card-title orange">🏠 AMBIENTES DA PLANTA</div>
+    <div class="info-box">
+      <strong style="color:var(--accent)">NBR 5410 §6.5.3:</strong> Pontos mínimos obrigatórios por ambiente.<br>
+      Iluminação: cabo 1,5mm² | Tomadas: 2,5mm² | Chuveiro/Ar: 2,5–4mm² conforme potência.
+    </div>
+    <div id="ambientes-container"></div>
+    <div class="flex-row" style="margin-top:14px;">
+      <div class="field flex-1">
+        <label>ADICIONAR AMBIENTE</label>
+        <select id="novo-ambiente">
+          <option value="sala">Sala de Estar</option>
+          <option value="quarto">Quarto</option>
+          <option value="cozinha">Cozinha</option>
+          <option value="banheiro">Banheiro</option>
+          <option value="area-servico">Área de Serviço</option>
+          <option value="garagem">Garagem</option>
+          <option value="escritorio">Escritório</option>
+          <option value="varanda">Varanda/Quintal</option>
+          <option value="corredor">Corredor/Hall</option>
+          <option value="despensa">Despensa</option>
+        </select>
+      </div>
+      <button class="btn btn-orange" onclick="adicionarAmbiente()">+ ADICIONAR</button>
+    </div>
+  </div>
+
+  <!-- NR-10 na PLANTA -->
+  <div class="card warn">
+    <div class="card-title warn">⚡ NR-10 — SEGURANÇA EM INSTALAÇÕES ELÉTRICAS</div>
+    <ul class="checklist" style="--nr12:var(--warn);">
+      <li><strong>Item 10.2.1:</strong> Todo trabalho em instalações elétricas deve ser executado por profissional habilitado ou qualificado.</li>
+      <li><strong>Item 10.2.3:</strong> É obrigatório o uso de EPI adequados (luvas isolantes, óculos, calçados de segurança).</li>
+      <li><strong>Item 10.4.1:</strong> Aplicar as medidas de controle: desenergização, bloqueio (LOTO), sinalização e aterramento.</li>
+      <li><strong>Item 10.5:</strong> Toda instalação deve ter proteção contra contatos diretos e indiretos.</li>
+      <li><strong>Item 10.6.1:</strong> Sinalizações de alerta e identificação de circuitos são obrigatórias no QD.</li>
+    </ul>
+  </div>
+
+  <button class="btn btn-primary no-print" onclick="calcularPlanta()" style="width:100%;margin-top:8px;">
+    ⚡ CALCULAR PLANTA COMPLETA
+  </button>
+</div>
+
+<!-- ===================== ELETRODOMÉSTICOS ===================== -->
+<div id="sec-eletros" class="section">
+  <div class="section-title">🔌 ELETRODOMÉSTICOS DA RESIDÊNCIA</div>
+
+  <div class="card">
+    <div class="card-title">📌 SELECIONE OS ELETRODOMÉSTICOS</div>
+    <div class="info-box warn">
+      ⚠️ A potência dos eletrodomésticos determina o dimensionamento dos circuitos.
+      Circuitos de ar-condicionado e chuveiro seguem regras específicas da NBR 5410.
+    </div>
+    <div id="eletros-container"></div>
+  </div>
+
+  <div class="card green">
+    <div class="card-title green">➕ ADICIONAR EQUIPAMENTO PERSONALIZADO</div>
+    <div class="grid3">
+      <div class="field">
+        <label>NOME DO EQUIPAMENTO</label>
+        <input type="text" id="custom-nome" placeholder="ex: Forno Industrial">
+      </div>
+      <div class="field">
+        <label>POTÊNCIA (W)</label>
+        <input type="number" id="custom-pot" placeholder="ex: 3000">
+      </div>
+      <div class="field">
+        <label>QUANTIDADE</label>
+        <input type="number" id="custom-qtd" value="1" min="1">
+      </div>
+    </div>
+    <button class="btn btn-green btn-sm" onclick="adicionarCustom()">+ ADICIONAR EQUIPAMENTO</button>
+  </div>
+
+  <div id="resumo-eletros" style="display:none;" class="card">
+    <div class="card-title green">📊 RESUMO DE CARGAS</div>
+    <div id="resumo-eletros-content"></div>
+  </div>
+
+  <button class="btn btn-primary no-print" onclick="calcularEletros()" style="width:100%;margin-top:8px;">
+    ⚡ CALCULAR CARGAS ELÉTRICAS
+  </button>
+</div>
+
+<!-- ===================== CIRCUITOS ===================== -->
+<div id="sec-circuitos" class="section">
+  <div class="section-title">⚡ DISTRIBUIÇÃO DE CIRCUITOS <span class="badge-nbr">NBR 5410 §6.3</span></div>
+
+  <div class="card">
+    <div class="card-title">📋 REGRAS DE CIRCUITOS — NBR 5410</div>
+    <div class="info-box">
+      <strong style="color:var(--accent)">§6.3.1</strong> — Cada chuveiro elétrico deve ter circuito exclusivo.<br>
+      <strong style="color:var(--accent)">§6.3.2</strong> — Ar-condicionado: circuito exclusivo por unidade.<br>
+      <strong style="color:var(--accent)">§6.3.3</strong> — Máquina de lavar: circuito independente recomendado.<br>
+      <strong style="color:var(--accent)">§6.5.3</strong> — Tomadas de uso geral: máx. 1.500W por circuito (fusível 15A).<br>
+      <strong style="color:var(--accent)">§6.5.4</strong> — Tomadas de uso específico: circuito exclusivo quando P > 1.000W.<br>
+      <strong style="color:var(--accent)">§6.4</strong> — Iluminação: separada de tomadas. Cabo mínimo 1,5mm².
+    </div>
+  </div>
+
+  <!-- NR-12 em circuitos -->
+  <div class="card nr12">
+    <div class="card-title nr12">🟣 NR-12 — PROTEÇÃO DE MÁQUINAS NO QD</div>
+    <div class="info-box nr12">
+      <strong style="color:var(--nr12)">Quando houver máquinas/equipamentos na instalação:</strong>
+    </div>
+    <ul class="checklist">
+      <li><strong>Item 12.38:</strong> Cada máquina deve ter dispositivo de seccionamento individual (disjuntor ou seccionador) identificado no QD.</li>
+      <li><strong>Item 12.56:</strong> Dispositivos de partida devem impedir partida automática após retorno de energia (anti-religamento).</li>
+      <li><strong>Item 12.57:</strong> Botoeira de emergência (cogumelo) em local acessível ao operador. Cor: vermelho sobre amarelo.</li>
+      <li><strong>Item 12.38.1:</strong> Chave de bloqueio (LOTO) para manutenção deve ser prevista no circuito de alimentação.</li>
+      <li><strong>Item 12.7:</strong> Identificação dos circuitos de alimentação de máquinas com plaquetas no QD e no equipamento.</li>
+    </ul>
+  </div>
+
+  <div id="circuitos-container">
+    <div class="card" style="text-align:center;padding:40px;">
+      <p style="color:var(--text2);font-family:'Share Tech Mono';">
+        ⚡ Configure a planta e os eletrodomésticos primeiro,<br>depois clique em CALCULAR para gerar os circuitos.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DIMENSIONAMENTO ===================== -->
+<div id="sec-dimensionamento" class="section">
+  <div class="section-title">📐 DIMENSIONAMENTO DE CONDUTORES</div>
+
+  <div class="card">
+    <div class="card-title">🔍 CALCULADORA DE CONDUTOR</div>
+    <div class="grid2">
+      <div class="field">
+        <label>CORRENTE DO CIRCUITO (A)</label>
+        <input type="number" id="dim-corrente" placeholder="ex: 12.7" step="0.1">
+      </div>
+      <div class="field">
+        <label>COMPRIMENTO DO CIRCUITO (m)</label>
+        <input type="number" id="dim-comp" placeholder="ex: 25" step="0.5">
+      </div>
+      <div class="field">
+        <label>TENSÃO DO CIRCUITO (V)</label>
+        <select id="dim-tensao">
+          <option value="127">127V</option>
+          <option value="220" selected>220V</option>
+          <option value="380">380V</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>TIPO DE CIRCUITO</label>
+        <select id="dim-tipo">
+          <option value="iluminacao">Iluminação (1,5mm² mínimo)</option>
+          <option value="tomada">Tomadas gerais (2,5mm² mínimo)</option>
+          <option value="chuveiro">Chuveiro (2,5mm² mínimo)</option>
+          <option value="ar">Ar-condicionado (2,5 ou 4mm²)</option>
+          <option value="especial">Uso específico (conforme carga)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>MÉTODO DE INSTALAÇÃO</label>
+        <select id="dim-metodo">
+          <option value="eletroduto">Eletroduto embutido</option>
+          <option value="eletroduto-exp">Eletroduto aparente</option>
+          <option value="bandeja">Bandeja/eletrocalha</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>FATOR DE POTÊNCIA (cos φ)</label>
+        <input type="number" id="dim-fp" value="0.92" step="0.01" min="0.6" max="1">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calcularDimensionamento()" style="width:100%;margin-top:8px;">
+      📐 CALCULAR DIMENSIONAMENTO
+    </button>
+    <div id="dim-resultado" style="display:none;"></div>
+  </div>
+
+  <div class="card orange">
+    <div class="card-title orange">📊 TABELA DE REFERÊNCIA — CABOS (NBR 5410 Tab. 36)</div>
+    <table class="mat-table">
+      <thead>
+        <tr><th>SEÇÃO (mm²)</th><th>CORRENTE MÁXIMA (A)</th><th>APLICAÇÃO TÍPICA</th><th>DISJUNTOR INDICADO</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1,5</td><td class="qty">15A</td><td>Iluminação</td><td>10A ou 16A</td></tr>
+        <tr><td>2,5</td><td class="qty">21A</td><td>Tomadas, chuveiro (≤4.500W), AC ≤9.000BTU</td><td>16A ou 20A</td></tr>
+        <tr><td>4,0</td><td class="qty">28A</td><td>Chuveiro, AC 9.000–18.000BTU</td><td>25A</td></tr>
+        <tr><td>6,0</td><td class="qty">36A</td><td>AC 18.000–30.000BTU, cargas pesadas</td><td>32A</td></tr>
+        <tr><td>10,0</td><td class="qty">50A</td><td>Quadro sub-distribuição, cargas > 8kW</td><td>40A ou 50A</td></tr>
+        <tr><td>16,0</td><td class="qty">68A</td><td>Entrada/ramal de alimentação</td><td>50A ou 63A</td></tr>
+        <tr><td>25,0</td><td class="qty">89A</td><td>Entrada principal trifásica</td><td>70A ou 80A</td></tr>
+        <tr><td>35,0</td><td class="qty">111A</td><td>Ramal industrial médio porte</td><td>100A</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- NR-10 no dimensionamento -->
+  <div class="card warn">
+    <div class="card-title warn">⚡ NR-10 — REQUISITOS PARA CONDUTORES E PROTEÇÕES</div>
+    <ul class="checklist" style="--nr12:var(--warn);">
+      <li><strong>Item 10.5.1:</strong> Toda instalação deve ter sistema de proteção contra sobrecorrente (disjuntores ou fusíveis) dimensionado para a corrente de projeto.</li>
+      <li><strong>Item 10.5.4:</strong> DR (Diferencial-Residual) 30mA obrigatório em circuitos de áreas molhadas (banheiros, área de serviço, cozinha).</li>
+      <li><strong>Item 10.5.5:</strong> DPS (Dispositivo de Proteção contra Surto) recomendado em todas as instalações.</li>
+      <li><strong>Item 10.6:</strong> Condutores devem ser identificados por cores: Fase (preto/vermelho/cinza), Neutro (azul claro), Terra (verde-amarelo).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== MATERIAIS ===================== -->
+<div id="sec-materiais" class="section">
+  <div class="section-title">📋 LISTA TÉCNICA DE MATERIAIS</div>
+
+  <div id="lista-materiais-content">
+    <div class="card" style="text-align:center;padding:40px;">
+      <p style="color:var(--text2);font-family:'Share Tech Mono';">
+        📋 Configure a planta e calcule os circuitos primeiro<br>para gerar a lista de materiais.
+      </p>
+      <button class="btn btn-orange no-print" onclick="gerarListaExemplo()" style="margin-top:20px;">
+        📋 GERAR LISTA DE EXEMPLO (100m²)
+      </button>
+    </div>
+  </div>
+
+  <div id="btn-imprimir" style="display:none;" class="no-print">
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-green" onclick="imprimirLista()">🖨️ IMPRIMIR LISTA TÉCNICA</button>
+      <button class="btn btn-warn" onclick="exportarPDF()">📄 SALVAR COMO PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== INDUSTRIAL ===================== -->
+<div id="sec-industrial" class="section">
+  <div class="section-title">🏭 DIMENSIONAMENTO INDUSTRIAL <span class="badge-nbr">NBR 5410 / NR-10</span> <span class="badge-nr12">NR-12</span></div>
+
+  <div class="card warn">
+    <div class="card-title warn">⚠️ NORMAS APLICÁVEIS — INDUSTRIAL</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <span class="tag tag-warn">NBR 5410</span>
+      <span class="tag tag-orange">NR-10 (Segurança Elétrica)</span>
+      <span class="tag tag-nr12">NR-12 (Máquinas e Equip.)</span>
+      <span class="tag tag-blue">NBR IEC 60364</span>
+      <span class="tag tag-green">NBR 5419 (SPDA)</span>
+      <span class="tag tag-warn">NBR 14039 (MT)</span>
+    </div>
+    <div class="info-box warn">
+      ⚠️ Instalações industriais exigem profissional habilitado (CREA).
+      Esta calculadora é apenas orientativa. Sempre consulte um engenheiro eletricista.
+    </div>
+  </div>
+
+  <!-- NR-12 Industrial -->
+  <div class="card nr12">
+    <div class="card-title nr12">🟣 NR-12 — SEGURANÇA NO TRABALHO COM MÁQUINAS E EQUIPAMENTOS</div>
+    <div class="info-box nr12">
+      <strong style="color:var(--nr12)">Obrigatório para instalações industriais com máquinas:</strong>
+    </div>
+    <ul class="checklist">
+      <li><strong>Item 12.5:</strong> As máquinas devem ser projetadas e construídas para suportar as condições de uso previstas, incluindo proteção elétrica adequada.</li>
+      <li><strong>Item 12.38:</strong> Toda máquina deve possuir dispositivo de seccionamento de energia identificado, acessível e bloqueável (LOTO).</li>
+      <li><strong>Item 12.54:</strong> Dispositivos de partida, parada e emergência devem ser claramente identificados e de fácil acesso ao operador.</li>
+      <li><strong>Item 12.56:</strong> Anti-religamento: após interrupção de energia, a máquina não pode religar automaticamente sem ação do operador.</li>
+      <li><strong>Item 12.57:</strong> Parada de emergência: botão cogumelo vermelho/amarelo, travamento positivo, reset manual obrigatório.</li>
+      <li><strong>Item 12.38.3:</strong> O cableamento deve ser protegido mecanicamente (eletroduto metálico ou bandeja fechada) nas proximidades de máquinas.</li>
+      <li><strong>Item 12.7:</strong> Toda máquina deve ter manual em português com diagramas elétricos disponíveis ao eletricista.</li>
+      <li><strong>Item 12.137:</strong> Aterramento de todos os elementos condutivos da máquina (carcaça, painéis, calhas metálicas).</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏭 DADOS DA INSTALAÇÃO INDUSTRIAL</div>
+    <div class="grid2">
+      <div class="field">
+        <label>TIPO DE INDÚSTRIA</label>
+        <select id="ind-tipo">
+          <option value="leve">Leve (oficina, gráfica)</option>
+          <option value="media">Média (metalúrgica, têxtil)</option>
+          <option value="pesada">Pesada (siderúrgica, química)</option>
+          <option value="alimenticia">Alimentícia</option>
+          <option value="hospitalar">Hospitalar/Laboratorial</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>POTÊNCIA TOTAL INSTALADA (kW)</label>
+        <input type="number" id="ind-potencia" placeholder="ex: 150" value="50">
+      </div>
+      <div class="field">
+        <label>TENSÃO DO SISTEMA</label>
+        <select id="ind-tensao">
+          <option value="220">220V Trifásico</option>
+          <option value="380" selected>380V Trifásico (padrão ind.)</option>
+          <option value="440">440V Trifásico</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>FATOR DE DEMANDA (%)</label>
+        <input type="number" id="ind-fd" value="75" min="50" max="100">
+      </div>
+      <div class="field">
+        <label>FATOR DE POTÊNCIA (cos φ)</label>
+        <input type="number" id="ind-fp" value="0.85" step="0.01" min="0.6" max="1">
+      </div>
+      <div class="field">
+        <label>COMPRIMENTO DO RAMAL (m)</label>
+        <input type="number" id="ind-comp" value="50">
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-top:12px;">
+      <div>
+        <label style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);letter-spacing:2px;">MOTORES</label>
+        <div id="motores-list" style="margin-top:8px;"></div>
+        <button class="btn btn-sm btn-orange" onclick="adicionarMotor()" style="margin-top:8px;">+ MOTOR</button>
+      </div>
+      <div>
+        <label style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);letter-spacing:2px;">NR-10 — PROTEÇÕES</label>
+        <div style="margin-top:8px;" class="info-box">
+          NR-10: Toda instalação industrial deve ter:<br>
+          • Seccionamento emergencial (LOTO)<br>
+          • DPS (proteção surto)<br>
+          • Aterramento (NBR 5410 §5.1)<br>
+          • SPDA se H > 20m (NBR 5419)
+        </div>
+      </div>
+      <div>
+        <label style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);letter-spacing:2px;">NR-12 — QGBT / MÁQUINAS</label>
+        <div style="margin-top:8px;" class="info-box nr12">
+          QGBT deve ter:<br>
+          • Disjuntor geral tripolar<br>
+          • Barramento de neutro e terra<br>
+          • Disjuntores por setor<br>
+          • Identificação por setor (NR-10)<br>
+          • Bloqueio LOTO por máquina<br>
+          • Botoeira emergência (NR-12)
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-warn" onclick="calcularIndustrial()" style="width:100%;margin-top:16px;">
+      🏭 CALCULAR INSTALAÇÃO INDUSTRIAL
+    </button>
+    <div id="ind-resultado" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ===================== FOTOVOLTAICO ===================== -->
+<div id="sec-fotovoltaico" class="section">
+  <div class="section-title solar">☀️ SISTEMA FOTOVOLTAICO <span class="badge-solar">NBR 16690</span> <span class="badge-nr12">NR-10</span></div>
+
+  <div class="card solar">
+    <div class="card-title solar">☀️ NORMAS DO SISTEMA FOTOVOLTAICO</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <span class="tag tag-solar">NBR 16690:2019 (Módulos FV)</span>
+      <span class="tag tag-solar">NBR 16149:2013 (Inversores)</span>
+      <span class="tag tag-solar">NBR 16274:2014 (Comissionamento)</span>
+      <span class="tag tag-orange">NR-10 (Segurança CC)</span>
+      <span class="tag tag-green">NBR 5419 (SPDA/FV)</span>
+      <span class="tag tag-blue">ABNT NBR IEC 62548</span>
+      <span class="tag tag-warn">REN ANEEL 482/2012</span>
+    </div>
+    <div class="info-box solar">
+      ☀️ Sistemas fotovoltaicos on-grid devem seguir a REN ANEEL 482/2012 para conexão à rede e obter aprovação da distribuidora local.
+      A instalação exige Anotação de Responsabilidade Técnica (ART) de engenheiro eletricista habilitado (CREA).
+    </div>
+  </div>
+
+  <!-- DIAGRAMA DO SISTEMA -->
+  <div class="card solar">
+    <div class="card-title solar">⚡ TOPOLOGIA DO SISTEMA FV (ON-GRID)</div>
+    <div class="solar-diagram">
+      <div class="solar-flow">
+        <div class="solar-block">☀️ PAINÉIS FV</div>
+        <div class="solar-arrow">→</div>
+        <div class="solar-block">🔌 STRING BOX<br><small style="color:var(--text2);font-size:10px;">(Fusíveis CC + DPS CC)</small></div>
+        <div class="solar-arrow">→</div>
+        <div class="solar-block">⚡ INVERSOR<br><small style="color:var(--text2);font-size:10px;">(CC → CA)</small></div>
+        <div class="solar-arrow">→</div>
+        <div class="solar-block">🔲 QD PRINCIPAL<br><small style="color:var(--text2);font-size:10px;">(Disjuntor CA)</small></div>
+        <div class="solar-arrow">→</div>
+        <div class="solar-block">🏠 CARGAS / REDE</div>
+      </div>
+      <div style="margin-top:10px;color:var(--text2);font-size:11px;">
+        Circuito CC: Painel → String Box → Inversor &nbsp;|&nbsp; Circuito CA: Inversor → QD → Rede/Cargas
+      </div>
+    </div>
+  </div>
+
+  <!-- CALCULADORA FV -->
+  <div class="card">
+    <div class="card-title solar">📐 CALCULADORA DE DIMENSIONAMENTO FV</div>
+    <div class="grid2">
+      <div class="field">
+        <label>CONSUMO MÉDIO MENSAL (kWh/mês)</label>
+        <input type="number" id="fv-consumo" value="300" placeholder="ex: 300">
+      </div>
+      <div class="field">
+        <label>IRRADIAÇÃO SOLAR LOCAL (kWh/m²/dia) <span class="tip" data-tip="Sertãozinho/SP ≈ 5.2 | Sul ≈ 4.5 | Nordeste ≈ 6.0">ℹ️</span></label>
+        <input type="number" id="fv-irradiacao" value="5.2" step="0.1" placeholder="ex: 5.2">
+      </div>
+      <div class="field">
+        <label>POTÊNCIA DO MÓDULO FV (Wp)</label>
+        <select id="fv-modulo-wp">
+          <option value="330">330 Wp</option>
+          <option value="370">370 Wp</option>
+          <option value="400">400 Wp</option>
+          <option value="440" selected>440 Wp (padrão atual)</option>
+          <option value="500">500 Wp</option>
+          <option value="545">545 Wp</option>
+          <option value="600">600 Wp</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>TENSÃO DO MÓDULO (Voc) <span class="tip" data-tip="Tensão de circuito aberto do módulo">ℹ️</span></label>
+        <input type="number" id="fv-voc" value="49.5" step="0.1" placeholder="ex: 49.5">
+      </div>
+      <div class="field">
+        <label>CORRENTE DO MÓDULO (Isc) <span class="tip" data-tip="Corrente de curto-circuito do módulo">ℹ️</span></label>
+        <input type="number" id="fv-isc" value="11.5" step="0.1" placeholder="ex: 11.5">
+      </div>
+      <div class="field">
+        <label>EFICIÊNCIA DO SISTEMA (%)</label>
+        <input type="number" id="fv-eficiencia" value="80" min="60" max="95" step="1">
+      </div>
+      <div class="field">
+        <label>TENSÃO MÁXIMA DO INVERSOR CC (V) <span class="tip" data-tip="Geralmente 600V, 800V ou 1000V">ℹ️</span></label>
+        <input type="number" id="fv-vmax-inv" value="600" placeholder="ex: 600">
+      </div>
+      <div class="field">
+        <label>CORRENTE MAX MPPT DO INVERSOR (A)</label>
+        <input type="number" id="fv-imax-mppt" value="15" placeholder="ex: 15">
+      </div>
+    </div>
+    <button class="btn btn-solar" onclick="calcularFotovoltaico()" style="width:100%;margin-top:8px;">
+      ☀️ CALCULAR SISTEMA FOTOVOLTAICO
+    </button>
+    <div id="fv-resultado" style="display:none;"></div>
+  </div>
+
+  <!-- NR-10 Fotovoltaico -->
+  <div class="card warn">
+    <div class="card-title warn">⚡ NR-10 — SEGURANÇA EM SISTEMAS FOTOVOLTAICOS</div>
+    <div class="info-box warn">
+      <strong style="color:var(--warn)">ATENÇÃO:</strong> O circuito CC de um sistema FV permanece energizado enquanto houver luz solar, mesmo com o inversor desligado. Risco de arco elétrico CC é extremamente perigoso.
+    </div>
+    <ul class="checklist" style="--nr12:var(--warn);">
+      <li><strong>Seccionador CC:</strong> Obrigatório entre a string box e o inversor. Deve ser visível, acessível e bloqueável (LOTO).</li>
+      <li><strong>Disjuntor CA:</strong> Obrigatório na saída do inversor antes do QD, para seccionamento seguro.</li>
+      <li><strong>EPI Específico:</strong> Luvas isolantes para Classe 0 (até 500V CC), óculos e face shield para trabalho no circuito CC.</li>
+      <li><strong>Sinalização:</strong> Painéis, cabos CC e string box devem ter etiquetas de alerta de tensão perigosa (≥30V CC).</li>
+      <li><strong>LOTO CC:</strong> Bloquear o seccionador CC antes de qualquer manutenção. Cobrir os painéis com lona opaca se necessário.</li>
+      <li><strong>Medição:</strong> Medir tensão CC antes de tocar nos terminais. Usar multímetro categoria CAT III ou IV.</li>
+    </ul>
+  </div>
+
+  <!-- Tabela de cabos FV -->
+  <div class="card solar">
+    <div class="card-title solar">📊 REFERÊNCIA — CABOS PARA SISTEMAS FV (NBR 16690)</div>
+    <table class="mat-table">
+      <thead><tr><th>SEÇÃO (mm²)</th><th>CORRENTE (A)</th><th>APLICAÇÃO FV</th><th>NORMA REF.</th></tr></thead>
+      <tbody>
+        <tr><td>4</td><td class="qty">32A</td><td>String simples até 8A Isc — Circuito CC painel→string box</td><td class="norm">NBR 16690 / IEC 62548</td></tr>
+        <tr><td>6</td><td class="qty">41A</td><td>String com Isc 8–13A — Cabo solar UV resistente</td><td class="norm">NBR 16690</td></tr>
+        <tr><td>10</td><td class="qty">57A</td><td>Saída string box para inversor (múltiplas strings)</td><td class="norm">NBR 16690</td></tr>
+        <tr><td>6</td><td class="qty">41A</td><td>Circuito CA: Inversor monofásico até 5kW</td><td class="norm">NBR 5410</td></tr>
+        <tr><td>10</td><td class="qty">57A</td><td>Circuito CA: Inversor monofásico 5–8kW</td><td class="norm">NBR 5410</td></tr>
+        <tr><td>16</td><td class="qty">76A</td><td>Circuito CA: Inversor trifásico até 15kW</td><td class="norm">NBR 5410</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box solar" style="margin-top:12px;margin-bottom:0;">
+      ☀️ <strong style="color:var(--solar)">Cabos CC:</strong> Devem ser do tipo solar (dupla isolação, resistência UV, temperatura até 120°C), conforme IEC 62930 / NBR 16690.
+      <strong style="color:var(--solar)">Cabos CA:</strong> Cabo flexível convencional conforme NBR 5410 é aceito.
+    </div>
+  </div>
+</div>
+
+<!-- =================== PRINT AREA =================== -->
+<div id="print-area" style="display:none;">
+  <div id="print-content"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const AMBIENTES_CONFIG = {
+  'sala':         { nome:'Sala de Estar',   ilum:2, tomadas:3, area_ref:20 },
+  'quarto':       { nome:'Quarto',           ilum:1, tomadas:4, area_ref:12 },
+  'cozinha':      { nome:'Cozinha',          ilum:1, tomadas:4, area_ref:10, especiais:['fogao','geladeira'] },
+  'banheiro':     { nome:'Banheiro',         ilum:1, tomadas:1, area_ref:6,  especiais:['chuveiro'] },
+  'area-servico': { nome:'Área de Serviço', ilum:1, tomadas:2, area_ref:8,  especiais:['maquina-lavar'] },
+  'garagem':      { nome:'Garagem',          ilum:1, tomadas:2, area_ref:15 },
+  'escritorio':   { nome:'Escritório',       ilum:2, tomadas:6, area_ref:12 },
+  'varanda':      { nome:'Varanda/Quintal',  ilum:1, tomadas:2, area_ref:10 },
+  'corredor':     { nome:'Corredor/Hall',    ilum:1, tomadas:1, area_ref:6 },
+  'despensa':     { nome:'Despensa',         ilum:1, tomadas:1, area_ref:5 },
+};
+
+const ELETROS_DATA = [
+  { nome:'Chuveiro Elétrico',        pot:5500, cat:'hidro',    exclusivo:true,  cabo:'2,5mm²',  icon:'🚿', obs:'NBR 5410: circuito exclusivo obrigatório' },
+  { nome:'Chuveiro Turbo (7500W)',   pot:7500, cat:'hidro',    exclusivo:true,  cabo:'4mm²',    icon:'🚿', obs:'Cabo 4mm² para P>5500W' },
+  { nome:'Ar-Cond. 7.000 BTU',      pot:900,  cat:'ar',       exclusivo:true,  cabo:'2,5mm²',  icon:'❄️', obs:'Até 9.000BTU: 2,5mm²' },
+  { nome:'Ar-Cond. 9.000 BTU',      pot:1100, cat:'ar',       exclusivo:true,  cabo:'2,5mm²',  icon:'❄️', obs:'Até 9.000BTU: 2,5mm²' },
+  { nome:'Ar-Cond. 12.000 BTU',     pot:1400, cat:'ar',       exclusivo:true,  cabo:'2,5mm²',  icon:'❄️', obs:'12.000BTU: 2,5mm²' },
+  { nome:'Ar-Cond. 18.000 BTU',     pot:2000, cat:'ar',       exclusivo:true,  cabo:'4mm²',    icon:'❄️', obs:'18.000BTU: 4mm² recomendado' },
+  { nome:'Ar-Cond. 24.000 BTU',     pot:2500, cat:'ar',       exclusivo:true,  cabo:'4mm²',    icon:'❄️', obs:'24.000BTU: cabo 4mm²' },
+  { nome:'Geladeira/Freezer',       pot:300,  cat:'cozinha',  exclusivo:false, cabo:'2,5mm²',  icon:'🧊', obs:'Tomada de uso específico' },
+  { nome:'Máquina de Lavar',        pot:1500, cat:'servico',  exclusivo:true,  cabo:'2,5mm²',  icon:'🌀', obs:'Circuito exclusivo recomendado' },
+  { nome:'Secadora de Roupas',      pot:3000, cat:'servico',  exclusivo:true,  cabo:'2,5mm²',  icon:'💨', obs:'Circuito exclusivo obrigatório' },
+  { nome:'Lava-Louças',             pot:1500, cat:'cozinha',  exclusivo:true,  cabo:'2,5mm²',  icon:'🍽️', obs:'Circuito exclusivo' },
+  { nome:'Forno Elétrico/Microondas',pot:1500,cat:'cozinha',  exclusivo:false, cabo:'2,5mm²',  icon:'📦', obs:'Tomada específica 20A' },
+  { nome:'Fogão com Forno',         pot:7000, cat:'cozinha',  exclusivo:true,  cabo:'4mm²',    icon:'🍳', obs:'Se elétrico: cabo 4mm²' },
+  { nome:'Forno de Embutir',        pot:2000, cat:'cozinha',  exclusivo:true,  cabo:'2,5mm²',  icon:'🔲', obs:'Circuito exclusivo' },
+  { nome:'Aquecedor de Água (500W)',pot:500,  cat:'outros',   exclusivo:false, cabo:'1,5mm²',  icon:'♨️', obs:'Tomada geral' },
+  { nome:'Ferro de Passar',         pot:1200, cat:'servico',  exclusivo:false, cabo:'2,5mm²',  icon:'👕', obs:'Tomada geral 20A' },
+  { nome:'Aspirador de Pó',         pot:1000, cat:'outros',   exclusivo:false, cabo:'2,5mm²',  icon:'💨', obs:'Tomada geral' },
+  { nome:'TV 40" a 65"',            pot:200,  cat:'outros',   exclusivo:false, cabo:'1,5mm²',  icon:'📺', obs:'Tomada geral' },
+  { nome:'Home Theater / Som',      pot:500,  cat:'outros',   exclusivo:false, cabo:'1,5mm²',  icon:'🔊', obs:'Tomada geral' },
+  { nome:'Computador / Monitor',    pot:400,  cat:'outros',   exclusivo:false, cabo:'1,5mm²',  icon:'💻', obs:'Tomada geral' },
+  { nome:'Bomba D\'água 1/2CV',     pot:370,  cat:'outros',   exclusivo:true,  cabo:'2,5mm²',  icon:'💧', obs:'Circuito exclusivo' },
+  { nome:'Bomba D\'água 1CV',       pot:750,  cat:'outros',   exclusivo:true,  cabo:'2,5mm²',  icon:'💧', obs:'Circuito exclusivo' },
+  { nome:'Portão Eletrônico',       pot:300,  cat:'outros',   exclusivo:false, cabo:'1,5mm²',  icon:'🚪', obs:'Circuito iluminação/tomada' },
+  { nome:'Aquecedor Solar (Bomba)', pot:150,  cat:'outros',   exclusivo:false, cabo:'1,5mm²',  icon:'☀️', obs:'Tomada geral' },
+];
+
+let ambientes = [];
+let eletrosAtivos = [];
+let customEletros = [];
+let circuitos = [];
+let materialList = [];
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active','active2'));
+  document.getElementById('sec-'+tab).classList.add('active');
+  const tabNames = ['planta','eletros','circuitos','dimensionamento','materiais','industrial','fotovoltaico'];
+  const tabs = document.querySelectorAll('.tab');
+  const idx = tabNames.indexOf(tab);
+  if(tabs[idx]) {
+    if(tab === 'fotovoltaico') tabs[idx].classList.add('active','tab-solar');
+    else tabs[idx].classList.add('active');
+  }
+}
+
+// ============================================================
+// AMBIENTES
+// ============================================================
+function initAmbientes() {
+  ['sala','quarto','quarto','cozinha','banheiro','area-servico'].forEach(a => adicionarAmbiente(a));
+}
+
+function adicionarAmbiente(tipo) {
+  tipo = tipo || document.getElementById('novo-ambiente').value;
+  const cfg = AMBIENTES_CONFIG[tipo];
+  const id = Date.now() + Math.random();
+  ambientes.push({ id, tipo, cfg, area: cfg.area_ref, ilum: cfg.ilum, tomadas: cfg.tomadas, ar: 0, chuveiro: tipo==='banheiro'?1:0 });
+  renderAmbientes();
+}
+
+function removerAmbiente(id) {
+  ambientes = ambientes.filter(a => a.id !== id);
+  renderAmbientes();
+}
+
+function renderAmbientes() {
+  const c = document.getElementById('ambientes-container');
+  if(ambientes.length === 0) { c.innerHTML = '<p style="color:var(--text2);font-family:Share Tech Mono;font-size:12px;padding:10px;">Nenhum ambiente adicionado.</p>'; return; }
+  c.innerHTML = ambientes.map(a => `
+    <div class="ambiente-item">
+      <div class="ambiente-header">
+        <div class="ambiente-name">🏠 ${a.cfg.nome.toUpperCase()}</div>
+        <button class="btn btn-danger btn-sm no-print" onclick="removerAmbiente(${a.id})">✕ REMOVER</button>
+      </div>
+      <div class="ambiente-grid">
+        <div class="field">
+          <label>ÁREA (m²)</label>
+          <input type="number" value="${a.area}" onchange="updateAmbiente(${a.id},'area',this.value)" min="1" max="200">
+        </div>
+        <div class="field">
+          <label>PONTOS ILUM. <span class="tip" data-tip="Mínimo NBR: ${a.cfg.ilum}">ℹ️</span></label>
+          <input type="number" value="${a.ilum}" onchange="updateAmbiente(${a.id},'ilum',this.value)" min="0" max="20">
+        </div>
+        <div class="field">
+          <label>TOMADAS <span class="tip" data-tip="Mínimo NBR: ${a.cfg.tomadas}">ℹ️</span></label>
+          <input type="number" value="${a.tomadas}" onchange="updateAmbiente(${a.id},'tomadas',this.value)" min="0" max="30">
+        </div>
+        ${a.tipo==='banheiro'||a.tipo==='area-servico' ? `
+        <div class="field">
+          <label>CHUVEIRO</label>
+          <input type="number" value="${a.chuveiro}" onchange="updateAmbiente(${a.id},'chuveiro',this.value)" min="0" max="3">
+        </div>` : ''}
+        <div class="field">
+          <label>AR-CONDICIONADO</label>
+          <input type="number" value="${a.ar}" onchange="updateAmbiente(${a.id},'ar',this.value)" min="0" max="5">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateAmbiente(id, field, value) {
+  const a = ambientes.find(x => x.id === id);
+  if(a) a[field] = Number(value);
+}
+
+// ============================================================
+// ELETROS
+// ============================================================
+function initEletros() {
+  const c = document.getElementById('eletros-container');
+  c.innerHTML = ELETROS_DATA.map((e,i) => `
+    <div class="eletro-item">
+      <input type="checkbox" id="eletro-${i}" onchange="toggleEletro(${i})">
+      <div class="eletro-info">
+        <div class="eletro-name">${e.icon} ${e.nome}</div>
+        <div class="eletro-spec">${e.obs}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="eletro-power">${e.pot}W</div>
+        <div style="margin-top:4px;">
+          <span class="tag ${e.exclusivo?'tag-orange':'tag-blue'}">${e.exclusivo?'EXCLUSIVO':'GERAL'}</span>
+          <span class="tag tag-green">${e.cabo}</span>
+        </div>
+        <div style="margin-top:6px;display:flex;align-items:center;gap:6px;justify-content:flex-end;">
+          <span style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);">QTD:</span>
+          <input type="number" class="eletro-custom-w" id="qtd-eletro-${i}" value="1" min="1" max="10" disabled>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleEletro(i) {
+  const cb = document.getElementById(`eletro-${i}`);
+  const qtd = document.getElementById(`qtd-eletro-${i}`);
+  qtd.disabled = !cb.checked;
+  if(!cb.checked) qtd.value = 1;
+}
+
+function adicionarCustom() {
+  const nome = document.getElementById('custom-nome').value.trim();
+  const pot = Number(document.getElementById('custom-pot').value);
+  const qtd = Number(document.getElementById('custom-qtd').value) || 1;
+  if(!nome || !pot) { alert('Preencha nome e potência!'); return; }
+  customEletros.push({ nome, pot, qtd, icon:'⚡', obs:'Personalizado', exclusivo: pot>1000, cabo: pot>3000?'4mm²':'2,5mm²' });
+  document.getElementById('custom-nome').value = '';
+  document.getElementById('custom-pot').value = '';
+  document.getElementById('custom-qtd').value = 1;
+  alert(`✅ ${nome} adicionado!`);
+}
+
+function calcularEletros() {
+  eletrosAtivos = [];
+  let totalW = 0;
+
+  ELETROS_DATA.forEach((e, i) => {
+    const cb = document.getElementById(`eletro-${i}`);
+    if(cb && cb.checked) {
+      const qtd = Number(document.getElementById(`qtd-eletro-${i}`).value) || 1;
+      eletrosAtivos.push({ ...e, qtd, totalW: e.pot * qtd });
+      totalW += e.pot * qtd;
+    }
+  });
+
+  customEletros.forEach(e => {
+    eletrosAtivos.push({ ...e, totalW: e.pot * e.qtd });
+    totalW += e.pot * e.qtd;
+  });
+
+  let fd = 1.0;
+  if(totalW > 10000) fd = 0.75;
+  else if(totalW > 5000) fd = 0.85;
+
+  const potDemanda = totalW * fd;
+  const tensao = Number(document.getElementById('tensao-rede').value);
+  const corrente = potDemanda / (tensao * 0.92);
+
+  const resumo = document.getElementById('resumo-eletros');
+  const content = document.getElementById('resumo-eletros-content');
+  resumo.style.display = 'block';
+
+  content.innerHTML = `
+    <div class="result-box">
+      ${eletrosAtivos.map(e => `
+        <div class="result-row">
+          <span class="result-label">${e.icon} ${e.nome} × ${e.qtd||1}</span>
+          <span class="result-value orange">${((e.pot*(e.qtd||1))/1000).toFixed(2)} kW</span>
+        </div>
+      `).join('')}
+      <div class="result-row" style="margin-top:8px;padding-top:12px;border-top:2px solid var(--accent);">
+        <span class="result-label" style="color:var(--accent);">POTÊNCIA TOTAL INSTALADA</span>
+        <span class="result-value accent">${(totalW/1000).toFixed(2)} kW</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">FATOR DE DEMANDA (NBR 5410)</span>
+        <span class="result-value warn">${(fd*100).toFixed(0)}%</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">POTÊNCIA DE DEMANDA</span>
+        <span class="result-value orange">${(potDemanda/1000).toFixed(2)} kW</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">CORRENTE ESTIMADA (${tensao}V)</span>
+        <span class="result-value" style="color:var(--accent3);font-size:18px;">${corrente.toFixed(1)} A</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="btn btn-orange no-print" onclick="gerarCircuitos()">⚡ GERAR CIRCUITOS →</button>
+    </div>
+  `;
+
+  gerarCircuitos();
+  alert('✅ Cargas calculadas! Vá para a aba CIRCUITOS.');
+}
+
+// ============================================================
+// CIRCUITOS
+// ============================================================
+function calcularPlanta() {
+  gerarCircuitos();
+  showTab('circuitos');
+}
+
+function gerarCircuitos() {
+  circuitos = [];
+  const tensao = Number(document.getElementById('tensao-rede').value);
+
+  let pontoIlum = ambientes.reduce((s,a) => s + (a.ilum||0), 0);
+  const nCircIlum = Math.ceil(pontoIlum / 8);
+  for(let i=0;i<nCircIlum;i++) {
+    circuitos.push({ id: circuitos.length+1, nome: `Iluminação ${String.fromCharCode(65+i)}`, tipo:'iluminacao', cabo:'1,5mm²', disjuntor:'10A', curva:'B', corrente:8, cor:'#00d4ff', exclusivo:false, nbr:'§6.4' });
+  }
+
+  let pontosTom = ambientes.reduce((s,a) => s + (a.tomadas||0), 0);
+  const nCircTom = Math.ceil(pontosTom / 6);
+  for(let i=0;i<nCircTom;i++) {
+    circuitos.push({ id: circuitos.length+1, nome: `Tomadas Gerais ${String.fromCharCode(65+i)}`, tipo:'tomada', cabo:'2,5mm²', disjuntor:'16A', curva:'C', corrente:12, cor:'#ff6b00', exclusivo:false, nbr:'§6.5.3' });
+  }
+
+  let chuveiros = ambientes.reduce((s,a) => s + (a.chuveiro||0), 0);
+  const chuvEletros = eletrosAtivos.filter(e => e.cat==='hidro');
+  const nChuvTotal = Math.max(chuveiros, chuvEletros.length);
+  for(let i=0;i<nChuvTotal;i++) {
+    const e = chuvEletros[i];
+    const pot = e ? e.pot : 5500;
+    const cabo = pot > 5500 ? '4mm²' : '2,5mm²';
+    const disj = pot > 5500 ? '32A' : '25A';
+    const corrI = pot / tensao;
+    circuitos.push({ id: circuitos.length+1, nome: `Chuveiro ${i+1} (${pot}W)`, tipo:'chuveiro', cabo, disjuntor:disj, curva:'C', corrente:corrI, cor:'#39ff14', exclusivo:true, nbr:'§6.3.1' });
+  }
+
+  const arEletros = eletrosAtivos.filter(e => e.cat==='ar');
+  const arAmb = ambientes.reduce((s,a) => s + (a.ar||0), 0);
+  const nAr = Math.max(arAmb, arEletros.length);
+  for(let i=0;i<nAr;i++) {
+    const e = arEletros[i];
+    const pot = e ? e.pot : 1100;
+    const cabo = pot > 1500 ? '4mm²' : '2,5mm²';
+    const disj = pot > 1500 ? '25A' : '20A';
+    const corrI = pot / tensao;
+    circuitos.push({ id: circuitos.length+1, nome: `Ar-Condicionado ${i+1}`, tipo:'ar', cabo, disjuntor:disj, curva:'C', corrente:corrI, cor:'#ffcc00', exclusivo:true, nbr:'§6.3.2' });
+  }
+
+  const outrosExcl = eletrosAtivos.filter(e => e.exclusivo && e.cat!=='hidro' && e.cat!=='ar');
+  outrosExcl.forEach(e => {
+    const corrI = e.pot / tensao;
+    const cabo = e.pot > 3000 ? '4mm²' : '2,5mm²';
+    const disj = e.pot > 3000 ? '25A' : '20A';
+    circuitos.push({ id: circuitos.length+1, nome: e.nome, tipo:'especial', cabo, disjuntor:disj, curva:'C', corrente:corrI, cor:'#ff6b00', exclusivo:true, nbr:'§6.5.4' });
+  });
+
+  renderCircuitos();
+  gerarMateriais();
+}
+
+function renderCircuitos() {
+  const c = document.getElementById('circuitos-container');
+  if(circuitos.length===0) return;
+
+  const totalDisj = circuitos.length;
+  const entrada = document.getElementById('padrao-entrada').value;
+
+  c.innerHTML = `
+    <div class="card green">
+      <div class="card-title green">📊 RESUMO DO QUADRO DE DISTRIBUIÇÃO</div>
+      <div class="grid3">
+        <div style="text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);">TOTAL DE CIRCUITOS</div>
+          <div style="font-family:'Orbitron';font-size:32px;color:var(--accent3);text-shadow:var(--glow3);">${totalDisj}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);">DISJUNTOR GERAL</div>
+          <div style="font-family:'Orbitron';font-size:32px;color:var(--accent2);text-shadow:var(--glow2);">${entrada}A</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);">SPACES NO QD</div>
+          <div style="font-family:'Orbitron';font-size:32px;color:var(--accent);">${Math.ceil((totalDisj+2)*1.25)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚡ CIRCUITOS DO QUADRO DE DISTRIBUIÇÃO</div>
+      <table class="mat-table">
+        <thead>
+          <tr><th>#</th><th>CIRCUITO</th><th>TIPO</th><th>CABO</th><th>DISJUNTOR</th><th>CURVA</th><th>I (A)</th><th>EXCLUSIVO</th><th>NORMA</th></tr>
+        </thead>
+        <tbody>
+          ${circuitos.map(c => `
+            <tr>
+              <td style="color:var(--text2);font-weight:700;">${String(c.id).padStart(2,'0')}</td>
+              <td class="item">${c.nome}</td>
+              <td><span class="tag tag-blue" style="font-size:10px;">${c.tipo.toUpperCase()}</span></td>
+              <td class="qty">${c.cabo}</td>
+              <td style="color:${c.cor};font-weight:700;">${c.disjuntor}</td>
+              <td class="unit">Curva ${c.curva}</td>
+              <td class="qty">${c.corrente.toFixed(1)}A</td>
+              <td><span class="tag ${c.exclusivo?'tag-orange':'tag-blue'}" style="font-size:10px;">${c.exclusivo?'SIM':'NÃO'}</span></td>
+              <td class="norm">${c.nbr}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ============================================================
+// DIMENSIONAMENTO (CORRIGIDO)
+// ============================================================
+function calcularDimensionamento() {
+  const I = Number(document.getElementById('dim-corrente').value);
+  const L = Number(document.getElementById('dim-comp').value);
+  const V = Number(document.getElementById('dim-tensao').value);
+  const tipo = document.getElementById('dim-tipo').value;
+  const fp = Number(document.getElementById('dim-fp').value) || 0.92;
+
+  if(!I||!L||!V) { alert('Preencha todos os campos!'); return; }
+
+  const Ip = I * 1.25;
+  let secaoMin = 1.5;
+  if(tipo==='tomada'||tipo==='chuveiro'||tipo==='ar') secaoMin = 2.5;
+  if(tipo==='especial' && I > 21) secaoMin = 4;
+  if(I > 28) secaoMin = 6;
+  if(I > 36) secaoMin = 10;
+
+  const rho = 0.0172;
+  const dU_max = V * 0.04;
+  const secaoQV = (2 * rho * L * I) / dU_max;
+
+  const secaoFinal = Math.max(secaoMin, secaoQV);
+  const cabos = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95];
+  const caboCap = [15, 21, 28, 36, 50, 68, 89, 111, 133, 165, 195];
+  let idxCabo = cabos.findIndex(c => c >= secaoFinal);
+  if(idxCabo<0) idxCabo = cabos.length-1;
+  while(idxCabo < cabos.length-1 && caboCap[idxCabo] < Ip) idxCabo++;
+
+  const caboEsc = cabos[idxCabo];
+  const capCorr = caboCap[idxCabo];
+  const disjs = [6,10,16,20,25,32,40,50,63,80,100];
+  let disj = disjs.find(d => d >= Ip) || 100;
+  if (disj > capCorr) {
+    const disjsDesc = [...disjs].sort((a,b) => b - a);
+    disj = disjsDesc.find(d => d <= capCorr) || disj;
+  }
+
+  const S = caboEsc;
+  const dU_real = (2 * rho * L * I) / S;
+  const dU_pct = (dU_real / V) * 100;
+
+  const res = document.getElementById('dim-resultado');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="result-box" style="margin-top:16px;">
+      <div class="steps">
+        <div class="step"><div class="step-num">01</div><div class="step-text">Corrente de projeto: Ip = I × 1,25 = ${I} × 1,25 = <span>${Ip.toFixed(2)} A</span></div></div>
+        <div class="step"><div class="step-num">02</div><div class="step-text">Seção mínima por tipo de circuito: <span>${secaoMin} mm²</span> (NBR 5410)</div></div>
+        <div class="step"><div class="step-num">03</div><div class="step-text">Seção por queda de tensão (≤4%): <span>${secaoQV.toFixed(3)} mm²</span> → (ρ=0,0172 Ω·mm²/m, L=${L}m)</div></div>
+        <div class="step"><div class="step-num">04</div><div class="step-text">Seção adotada (maior valor): <span>${caboEsc} mm²</span> (cap. ${capCorr}A)</div></div>
+        <div class="step"><div class="step-num">05</div><div class="step-text">Queda de tensão real: ΔU = ${dU_real.toFixed(2)}V = <span>${dU_pct.toFixed(2)}%</span> ${dU_pct<=4?'✅ OK':'⚠️ ACIMA DO LIMITE'}</div></div>
+        <div class="step"><div class="step-num">06</div><div class="step-text">Disjuntor selecionado: <span>${disj}A — Curva C</span></div></div>
+      </div>
+      <div class="total-box" style="margin-top:12px;">
+        <div class="total-label">CABO RECOMENDADO</div>
+        <div class="total-value">${caboEsc} mm²</div>
+        <div class="total-sub">Cobre | Disjuntor: ${disj}A Curva C | ΔU: ${dU_pct.toFixed(2)}% ${dU_pct<=4?'✅':'⚠️'}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// MATERIAIS
+// ============================================================
+function gerarMateriais() {
+  materialList = [];
+  const area = Number(document.getElementById('area-total').value) || 100;
+  const nCirc = circuitos.length || 6;
+
+  let cabo15=0, cabo25=0, cabo4=0, cabo6=0, cabo10=0;
+  const compMedio = Math.sqrt(area) * 3;
+
+  circuitos.forEach(c => {
+    const comp = compMedio * 3;
+    if(c.cabo==='1,5mm²') cabo15 += comp;
+    else if(c.cabo==='2,5mm²') cabo25 += comp;
+    else if(c.cabo==='4mm²') cabo4 += comp;
+    else if(c.cabo==='6mm²') cabo6 += comp;
+    else if(c.cabo==='10mm²') cabo10 += comp;
+  });
+
+  const folga = 1.2;
+  if(cabo15>0) materialList.push({ item:'Cabo Flexível 1,5mm² — Fase (vermelho/preto)', qty:Math.ceil(cabo15*folga/3), unit:'m', norm:'NBR 5410 Tab.36 / iluminação', cat:'cabos' });
+  if(cabo15>0) materialList.push({ item:'Cabo Flexível 1,5mm² — Neutro (azul)', qty:Math.ceil(cabo15*folga/3), unit:'m', norm:'NBR 5410', cat:'cabos' });
+  if(cabo15>0) materialList.push({ item:'Cabo Flexível 1,5mm² — Terra (verde-amarelo)', qty:Math.ceil(cabo15*folga/3), unit:'m', norm:'NBR 5410', cat:'cabos' });
+  if(cabo25>0) materialList.push({ item:'Cabo Flexível 2,5mm² — Fase (vermelho/preto)', qty:Math.ceil(cabo25*folga/3), unit:'m', norm:'NBR 5410 Tab.36 / tomadas', cat:'cabos' });
+  if(cabo25>0) materialList.push({ item:'Cabo Flexível 2,5mm² — Neutro (azul)', qty:Math.ceil(cabo25*folga/3), unit:'m', norm:'NBR 5410', cat:'cabos' });
+  if(cabo25>0) materialList.push({ item:'Cabo Flexível 2,5mm² — Terra (verde-amarelo)', qty:Math.ceil(cabo25*folga/3), unit:'m', norm:'NBR 5410', cat:'cabos' });
+  if(cabo4>0) materialList.push({ item:'Cabo Flexível 4mm² — Fase', qty:Math.ceil(cabo4*folga/3), unit:'m', norm:'NBR 5410 / chuveiro/AC', cat:'cabos' });
+  if(cabo4>0) materialList.push({ item:'Cabo Flexível 4mm² — Neutro', qty:Math.ceil(cabo4*folga/3), unit:'m', norm:'NBR 5410', cat:'cabos' });
+  if(cabo4>0) materialList.push({ item:'Cabo Flexível 4mm² — Terra', qty:Math.ceil(cabo4*folga/3), unit:'m', norm:'NBR 5410', cat:'cabos' });
+
+  const metEltr = area * 1.8;
+  materialList.push({ item:'Eletroduto Corrugado 3/4" (20mm) — iluminação', qty:Math.ceil(metEltr*0.4), unit:'m', norm:'NBR 5410 §6.2', cat:'eletrodutos' });
+  materialList.push({ item:'Eletroduto Corrugado 1" (25mm) — tomadas/circuitos gerais', qty:Math.ceil(metEltr*0.6), unit:'m', norm:'NBR 5410 §6.2', cat:'eletrodutos' });
+  materialList.push({ item:'Eletroduto Rígido PVC 3/4" (20mm)', qty:Math.ceil(area*0.3), unit:'m', norm:'NBR 5410', cat:'eletrodutos' });
+
+  const pontosTom = ambientes.reduce((s,a)=>s+(a.tomadas||0),0);
+  const pontosIlum = ambientes.reduce((s,a)=>s+(a.ilum||0),0);
+  materialList.push({ item:'Caixa de Passagem 4"×4" (tomadas)', qty:pontosTom||12, unit:'un', norm:'NBR 5410', cat:'caixas' });
+  materialList.push({ item:'Caixa de Passagem 4"×2" (interruptores)', qty:pontosIlum||8, unit:'un', norm:'NBR 5410', cat:'caixas' });
+  materialList.push({ item:'Caixa Octogonal 3"×3" (luminárias)', qty:pontosIlum||8, unit:'un', norm:'NBR 5410', cat:'caixas' });
+
+  const entradaA = Number(document.getElementById('padrao-entrada').value) || 40;
+  materialList.push({ item:`Disjuntor Geral ${entradaA}A — Bipolar Curva C`, qty:1, unit:'un', norm:'NBR 5410 §5.3', cat:'protecao' });
+  const nCirIlum = circuitos.filter(c=>c.tipo==='iluminacao').length || 2;
+  const nCirTom = circuitos.filter(c=>c.tipo==='tomada').length || 3;
+  const nCirEsp = circuitos.filter(c=>c.tipo!=='iluminacao'&&c.tipo!=='tomada').length || 4;
+  materialList.push({ item:'Disjuntor 10A — Monopolar Curva B (iluminação)', qty:nCirIlum, unit:'un', norm:'NBR 5410', cat:'protecao' });
+  materialList.push({ item:'Disjuntor 16A — Monopolar Curva C (tomadas)', qty:nCirTom, unit:'un', norm:'NBR 5410', cat:'protecao' });
+  materialList.push({ item:'Disjuntor 20A/25A — Monopolar Curva C (chuveiro/AC)', qty:nCirEsp, unit:'un', norm:'NBR 5410', cat:'protecao' });
+  materialList.push({ item:`Quadro de Distribuição — ${Math.ceil((nCirc+2)*1.25)} disjuntores`, qty:1, unit:'un', norm:'NBR 5410 §5.3', cat:'protecao' });
+  materialList.push({ item:'DR (Diferencial-Residual) 30mA — Bipolar 40A', qty:Math.ceil(nCirc/8), unit:'un', norm:'NBR 5410 §5.1.3.2 / NR-10', cat:'protecao' });
+  materialList.push({ item:'DPS Classe III — 127/220V (proteção surto)', qty:1, unit:'un', norm:'NBR 5410 / NR-10 Item 10.5.5', cat:'protecao' });
+
+  materialList.push({ item:'Tomada 2P+T 10A (NBR 14136) — branca', qty:Math.ceil(pontosTom*0.7)||10, unit:'un', norm:'NBR 14136', cat:'dispositivos' });
+  materialList.push({ item:'Tomada 2P+T 20A (NBR 14136) — branca', qty:Math.ceil(pontosTom*0.3)||4, unit:'un', norm:'NBR 14136 / uso específico', cat:'dispositivos' });
+  materialList.push({ item:'Interruptor Simples 10A', qty:Math.ceil(pontosIlum*0.6)||5, unit:'un', norm:'NBR 5410', cat:'dispositivos' });
+  materialList.push({ item:'Interruptor Paralelo (3 vias) 10A', qty:Math.ceil(pontosIlum*0.4)||3, unit:'un', norm:'NBR 5410', cat:'dispositivos' });
+
+  materialList.push({ item:'Haste de Aterramento Copperweld 5/8"×2,4m', qty:2, unit:'un', norm:'NBR 5410 §5.1', cat:'aterramento' });
+  materialList.push({ item:'Cabo de Aterramento 10mm² (verde-amarelo)', qty:30, unit:'m', norm:'NBR 5410 §5.1', cat:'aterramento' });
+  materialList.push({ item:'Conector Para Haste de Aterramento', qty:2, unit:'un', norm:'NBR 5410', cat:'aterramento' });
+
+  materialList.push({ item:'Luminária LED Spot 7W (downlight)', qty:pontosIlum||8, unit:'un', norm:'INMETRO', cat:'luminarias' });
+  materialList.push({ item:'Lâmpada LED Bulbo 9W E27', qty:Math.ceil(pontosIlum*0.3)||4, unit:'un', norm:'INMETRO', cat:'luminarias' });
+
+  materialList.push({ item:'Abraçadeiras Metálicas 1/2" — fixação eletroduto', qty:Math.ceil(area*0.5), unit:'un', norm:'', cat:'acessorios' });
+  materialList.push({ item:'Luva Corrugada 3/4"', qty:Math.ceil(area*0.2), unit:'un', norm:'', cat:'acessorios' });
+  materialList.push({ item:'Fita Isolante 20m', qty:5, unit:'un', norm:'', cat:'acessorios' });
+  materialList.push({ item:'Identificador de Circuitos (etiqueta NR-10)', qty:nCirc+2, unit:'un', norm:'NR-10 Item 10.6.1', cat:'acessorios' });
+
+  renderMateriais();
+}
+
+function renderMateriais() {
+  const cats = {
+    cabos:      '🔶 CABOS CONDUTORES',
+    eletrodutos:'🟦 ELETRODUTOS E TUBULAÇÕES',
+    caixas:     '⬛ CAIXAS DE PASSAGEM',
+    protecao:   '🔴 PROTEÇÃO — DISJUNTORES E QD',
+    dispositivos:'🟢 TOMADAS E INTERRUPTORES',
+    aterramento:'🌍 ATERRAMENTO',
+    luminarias: '💡 LUMINÁRIAS',
+    acessorios: '🔧 ACESSÓRIOS',
+  };
+
+  let html = '';
+  Object.entries(cats).forEach(([cat, label]) => {
+    const items = materialList.filter(m => m.cat === cat);
+    if(items.length===0) return;
+    html += `
+      <div class="card">
+        <div class="card-title">${label}</div>
+        <table class="mat-table">
+          <thead><tr><th>#</th><th>DESCRIÇÃO DO MATERIAL</th><th>QTD</th><th>UN</th><th>REF. NORMA</th></tr></thead>
+          <tbody>
+            ${items.map((m,i) => `
+              <tr>
+                <td style="color:var(--text2);">${String(i+1).padStart(2,'0')}</td>
+                <td class="item">${m.item}</td>
+                <td class="qty">${m.qty}</td>
+                <td class="unit">${m.unit}</td>
+                <td class="norm">${m.norm}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="total-box">
+      <div class="total-label">TOTAL DE ITENS NA LISTA</div>
+      <div class="total-value">${materialList.length}</div>
+      <div class="total-sub">Lista gerada conforme NBR 5410 / NR-10 / NR-12 • ${new Date().toLocaleDateString('pt-BR')}</div>
+    </div>
+  `;
+
+  document.getElementById('lista-materiais-content').innerHTML = html;
+  document.getElementById('btn-imprimir').style.display = 'block';
+}
+
+function gerarListaExemplo() {
+  const tiposExemplo = ['sala','quarto','quarto','cozinha','banheiro','area-servico','garagem'];
+  tiposExemplo.forEach(tipo => {
+    if (!ambientes.find(a => a.tipo === tipo)) adicionarAmbiente(tipo);
+  });
+  gerarCircuitos();
+  showTab('materiais');
+}
+
+// ============================================================
+// IMPRIMIR
+// ============================================================
+function imprimirLista() {
+  const area = document.getElementById('area-total').value;
+  const tensao = document.getElementById('tensao-rede').value;
+  const data = new Date().toLocaleDateString('pt-BR');
+  const hora = new Date().toLocaleTimeString('pt-BR');
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Lista Técnica — NBR 5410 / NR-10 / NR-12</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 20px; }
+  h1 { font-size: 18px; border-bottom: 3px solid #ff6b00; padding-bottom: 8px; }
+  h2 { font-size: 13px; background: #333; color: #fff; padding: 6px 10px; margin-top: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  th { background: #eee; font-size: 11px; padding: 7px; text-align: left; border: 1px solid #ccc; }
+  td { padding: 6px 8px; border: 1px solid #ddd; font-size: 11px; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+  .header-info { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 11px; color: #555; }
+  .footer { text-align: center; margin-top: 24px; font-size: 10px; color: #999; border-top: 1px solid #ccc; padding-top: 8px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+  .badge-orange { background: #ff6b00; color: #fff; }
+  .badge-blue { background: #0066aa; color: #fff; }
+  .badge-nr12 { background: #8800cc; color: #fff; }
+  @media print { @page { margin: 15mm; } }
+</style>
+</head>
+<body>
+<h1>⚡ LISTA TÉCNICA DE MATERIAIS ELÉTRICOS</h1>
+<div class="header-info">
+  <div>
+    <strong>Normas:</strong> NBR 5410:2004 · NR-10 · NR-12 &nbsp;|&nbsp;
+    <strong>Área:</strong> ${area} m² &nbsp;|&nbsp;
+    <strong>Tensão:</strong> ${tensao}V<br>
+    <strong>Circuitos:</strong> ${circuitos.length} circuitos dimensionados
+  </div>
+  <div style="text-align:right;">
+    <strong>Data:</strong> ${data}<br>
+    <strong>Hora:</strong> ${hora}
+  </div>
+</div>
+
+${Object.entries({
+  cabos: 'CABOS CONDUTORES',
+  eletrodutos: 'ELETRODUTOS E TUBULAÇÕES',
+  caixas: 'CAIXAS DE PASSAGEM',
+  protecao: 'PROTEÇÃO — DISJUNTORES E QD',
+  dispositivos: 'TOMADAS E INTERRUPTORES',
+  aterramento: 'ATERRAMENTO',
+  luminarias: 'LUMINÁRIAS',
+  acessorios: 'ACESSÓRIOS',
+}).map(([cat, label]) => {
+  const items = materialList.filter(m => m.cat === cat);
+  if(!items.length) return '';
+  return `
+    <h2>${label}</h2>
+    <table>
+      <thead><tr><th>#</th><th>DESCRIÇÃO</th><th>QTD</th><th>UN</th><th>REF. NORMA</th></tr></thead>
+      <tbody>
+        ${items.map((m,i) => `
+          <tr>
+            <td>${String(i+1).padStart(2,'0')}</td>
+            <td>${m.item}</td>
+            <td><strong>${m.qty}</strong></td>
+            <td>${m.unit}</td>
+            <td>${m.norm}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}).join('')}
+
+<div class="footer">
+  ⚡ Dimensionamento orientativo conforme NBR 5410:2004 | NR-10 | NR-12 | Consulte sempre um engenheiro eletricista habilitado (CREA)<br>
+  Gerado em ${data} às ${hora}
+</div>
+</body>
+</html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 500);
+}
+
+function exportarPDF() {
+  alert('💡 Dica: Ao imprimir, selecione "Salvar como PDF" na impressora do navegador!');
+  imprimirLista();
+}
+
+// ============================================================
+// INDUSTRIAL
+// ============================================================
+function adicionarMotor() {
+  const c = document.getElementById('motores-list');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;align-items:center;';
+  div.innerHTML = `
+    <input type="number" placeholder="cv" style="width:60px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px;font-family:'Share Tech Mono';font-size:12px;" value="1">
+    <span style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);">CV</span>
+    <input type="number" placeholder="qtd" style="width:50px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px;font-family:'Share Tech Mono';font-size:12px;" value="1">
+    <span style="font-family:'Share Tech Mono';font-size:11px;color:var(--text2);">un</span>
+    <button onclick="this.parentElement.remove()" style="background:#ff2244;border:none;color:#fff;padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">✕</button>
+  `;
+  c.appendChild(div);
+}
+
+function calcularIndustrial() {
+  const Ptotal = Number(document.getElementById('ind-potencia').value) * 1000;
+  const V = Number(document.getElementById('ind-tensao').value);
+  const fd = Number(document.getElementById('ind-fd').value) / 100;
+  const fp = Number(document.getElementById('ind-fp').value);
+  const L = Number(document.getElementById('ind-comp').value);
+
+  const Pd = Ptotal * fd;
+  const I_trifasico = Pd / (Math.sqrt(3) * V * fp);
+  const Ip = I_trifasico * 1.25;
+  const I_partida_dir = I_trifasico * 6;
+  const I_partida_est = I_trifasico * 2.5;
+
+  const cabos = [1.5,2.5,4,6,10,16,25,35,50,70,95];
+  const caps  = [15, 21, 28,36,50,68,89,111,133,165,195];
+  let idx = caps.findIndex(c => c >= Ip);
+  if(idx<0) idx = cabos.length-1;
+  const cabo = cabos[idx];
+  const capC = caps[idx];
+
+  const rho = 0.0172;
+  const dU = (Math.sqrt(3) * rho * L * I_trifasico) / cabo;
+  const dUpct = (dU / V) * 100;
+
+  const disjs = [16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630];
+  const disj = disjs.find(d => d >= Ip * 1.0) || 630;
+
+  const res = document.getElementById('ind-resultado');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="result-box" style="margin-top:16px;">
+      <div class="steps">
+        <div class="step"><div class="step-num">01</div><div class="step-text">Potência instalada: <span>${(Ptotal/1000).toFixed(1)} kW</span> | Fator de demanda: <span>${(fd*100).toFixed(0)}%</span></div></div>
+        <div class="step"><div class="step-num">02</div><div class="step-text">Potência de demanda: Pd = ${(Ptotal/1000).toFixed(1)} × ${(fd*100).toFixed(0)}% = <span>${(Pd/1000).toFixed(2)} kW</span></div></div>
+        <div class="step"><div class="step-num">03</div><div class="step-text">Corrente nominal (trifásico ${V}V): I = Pd / (√3 × V × cosφ) = <span>${I_trifasico.toFixed(2)} A</span></div></div>
+        <div class="step"><div class="step-num">04</div><div class="step-text">Corrente de projeto: Ip = ${I_trifasico.toFixed(2)} × 1,25 = <span>${Ip.toFixed(2)} A</span></div></div>
+        <div class="step"><div class="step-num">05</div><div class="step-text">Corrente de partida direta (estimada): <span>${I_partida_dir.toFixed(1)} A</span> | Estrela-triângulo: <span>${I_partida_est.toFixed(1)} A</span></div></div>
+        <div class="step"><div class="step-num">06</div><div class="step-text">Seção do cabo selecionada: <span>${cabo} mm²</span> (cap. ${capC}A)</div></div>
+        <div class="step"><div class="step-num">07</div><div class="step-text">Queda de tensão: ΔU = ${dU.toFixed(2)}V = <span>${dUpct.toFixed(2)}%</span> ${dUpct<=4?'✅ OK (≤4%)':'⚠️ ACIMA DO LIMITE'}</div></div>
+        <div class="step"><div class="step-num">08</div><div class="step-text">Disjuntor tripolar: <span>${disj}A — Curva D (motores)</span></div></div>
+      </div>
+
+      <div class="total-box" style="margin-top:12px;">
+        <div class="total-label">CABO DO RAMAL PRINCIPAL</div>
+        <div class="total-value">${cabo} mm²</div>
+        <div class="total-sub">Trifásico ${V}V | Disjuntor: ${disj}A Curva D | In: ${I_trifasico.toFixed(1)}A | ΔU: ${dUpct.toFixed(2)}%</div>
+      </div>
+
+      <div style="margin-top:16px;" class="info-box warn">
+        ⚠️ <strong>NR-10 — Obrigatório para instalações industriais:</strong><br>
+        • Seccionamento de emergência acessível (bloqueio LOTO)<br>
+        • Sinalização de tensão e perigo em todos os painéis<br>
+        • Aterramento de todos os equipamentos (NBR 5410 §5.1)<br>
+        • Proteção contra partida acidental (anti-religamento)<br>
+        • Profissional habilitado com ART (CREA)<br>
+        • PPRA/PCMSO se > 1 funcionário exposto
+      </div>
+
+      <div style="margin-top:12px;" class="info-box nr12">
+        🟣 <strong style="color:var(--nr12)">NR-12 — Obrigatório para máquinas nesta instalação:</strong><br>
+        • Seccionador individual por máquina (bloqueável — LOTO) — Item 12.38<br>
+        • Botoeira de parada de emergência (cogumelo vermelho/amarelo) — Item 12.57<br>
+        • Anti-religamento: a máquina não pode religar após queda de energia — Item 12.56<br>
+        • Proteção mecânica dos cabos próximos à máquina (eletroduto metálico) — Item 12.38.3<br>
+        • Aterramento de todas as partes condutoras da máquina — Item 12.137<br>
+        • Manual com diagrama elétrico disponível ao eletricista — Item 12.7
+      </div>
+
+      <div style="margin-top:12px;" class="info-box">
+        <strong style="color:var(--accent)">NBR 5410 Industrial — Itens adicionais recomendados:</strong><br>
+        • QGBT com barramentos dimensionados para Ip = ${Ip.toFixed(0)}A<br>
+        • Banco de capacitores se cosφ &lt; 0,92 (ANEEL)<br>
+        • SPDA (NBR 5419) se edificação H &gt; 20m ou área &gt; 200m²<br>
+        • Medição de energia (kWh) por setor produtivo<br>
+        • UPS/No-break para equipamentos críticos
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// FOTOVOLTAICO (NBR 16690 / NBR 16149 / NBR 16274 / NR-10)
+// ============================================================
+function calcularFotovoltaico() {
+  const consumo   = Number(document.getElementById('fv-consumo').value);       // kWh/mês
+  const hsp       = Number(document.getElementById('fv-irradiacao').value);    // kWh/m²/dia (HSP)
+  const wpModulo  = Number(document.getElementById('fv-modulo-wp').value);     // Wp
+  const voc       = Number(document.getElementById('fv-voc').value);           // V
+  const isc       = Number(document.getElementById('fv-isc').value);           // A
+  const efic      = Number(document.getElementById('fv-eficiencia').value)/100;// decimal
+  const vmaxInv   = Number(document.getElementById('fv-vmax-inv').value);      // V
+  const imaxMppt  = Number(document.getElementById('fv-imax-mppt').value);     // A
+
+  if(!consumo||!hsp||!wpModulo||!voc||!isc) { alert('Preencha todos os campos!'); return; }
+
+  // 1. Potência do sistema FV necessária
+  const Psistema = consumo / (hsp * 30 * efic);
+
+  // 2. Número de módulos
+  const nModulos = Math.ceil((Psistema * 1000) / wpModulo);
+  const PtotalInstalada = (nModulos * wpModulo) / 1000; // kWp
+
+  // 3. Energia gerada estimada
+  const energiaGerada = PtotalInstalada * hsp * 30 * efic;
+
+  // 4. String Box — módulos em série (Voc ≤ Vmax inversor)
+  const fatorTemp = 1 - (0.0035 * 50); // coef. conservador
+  const vocCorrigida = voc * fatorTemp;
+  const modulosSerie = Math.floor(vmaxInv / vocCorrigida);
+
+  // 5. Strings em paralelo
+  const stringsParalelo = Math.floor(imaxMppt / (isc * 1.25));
+  const modulosPorString = Math.min(modulosSerie, Math.ceil(nModulos / Math.max(stringsParalelo, 1)));
+  const nStrings = Math.ceil(nModulos / modulosPorString);
+
+  // 6. Corrente CC total (após string box)
+  const Icc_string = isc * 1.25; // corrente de projeto por string
+  const Icc_total = Icc_string * nStrings;
+
+  // 7. Tensão CC operação (Vmpp estimado = ~80% Voc)
+  const Vmpp_modulo = voc * 0.8;
+  const Vcc_string = Vmpp_modulo * modulosPorString;
+
+  // 8. Cabo CC (circuito: painel → string box)
+  const cabosCC = [4,6,10,16,25];
+  const capsCC  = [32,41,57,76,101];
+  let idxCC = capsCC.findIndex(c => c >= Icc_string);
+  if(idxCC<0) idxCC = cabosCC.length-1;
+  const caboCC = cabosCC[idxCC];
+
+  // 9. Corrente CA (saída inversor)
+  const Vca = 220;
+  const fpCA = 0.95;
+  const Ica = (PtotalInstalada * 1000) / (Vca * fpCA);
+  const Ica_proj = Ica * 1.25;
+
+  const cabosCA = [1.5,2.5,4,6,10,16,25];
+  const capsCA  = [15, 21, 28,36,50,68,89];
+  let idxCA = capsCA.findIndex(c => c >= Ica_proj);
+  if(idxCA<0) idxCA = cabosCA.length-1;
+  const caboCA = cabosCA[idxCA];
+
+  // 10. Disjuntor CA (saída inversor → QD)
+  const disjsCA = [6,10,16,20,25,32,40,50,63];
+  const disjCA = disjsCA.find(d => d >= Ica_proj) || 63;
+
+  // 11. Fusíveis CC por string (1,25 × Isc, curva gPV)
+  const fusiveisCCamp = [8,10,12,15,20,25,32];
+  const fusCC = fusiveisCCamp.find(f => f >= isc * 1.25) || 20;
+
+  // 12. DPS CC — Classe II
+  const dpsCCTensao = Math.ceil(Vcc_string * 1.2 / 100) * 100;
+
+  const res = document.getElementById('fv-resultado');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="result-box" style="margin-top:16px;border-color:var(--solar);">
+      <div class="steps">
+        <div class="step"><div class="step-num solar">01</div><div class="step-text">Potência FV necessária: Psis = ${consumo} ÷ (${hsp} × 30 × ${(efic*100).toFixed(0)}%) = <span>${Psistema.toFixed(2)} kWp</span></div></div>
+        <div class="step"><div class="step-num solar">02</div><div class="step-text">Número de módulos: N = ⌈${(Psistema*1000).toFixed(0)} ÷ ${wpModulo}Wp⌉ = <span>${nModulos} módulos</span> → ${PtotalInstalada.toFixed(2)} kWp instalados</div></div>
+        <div class="step"><div class="step-num solar">03</div><div class="step-text">Energia gerada estimada: <span>${energiaGerada.toFixed(0)} kWh/mês</span> (com eficiência ${(efic*100).toFixed(0)}%)</div></div>
+        <div class="step"><div class="step-num solar">04</div><div class="step-text">Módulos em série/string: Voc corrigida (70°C) = ${vocCorrigida.toFixed(1)}V → máx <span>${modulosSerie} módulos/string</span> (Vmax inv. ${vmaxInv}V)</div></div>
+        <div class="step"><div class="step-num solar">05</div><div class="step-text">Strings em paralelo (Imax MPPT ${imaxMppt}A): máx <span>${stringsParalelo} strings</span> — Configuração: <span>${nStrings} string(s) × ${modulosPorString} módulos</span></div></div>
+        <div class="step"><div class="step-num solar">06</div><div class="step-text">Tensão CC de operação (Vmpp): ${Vmpp_modulo.toFixed(1)}V × ${modulosPorString} = <span>${Vcc_string.toFixed(1)}V</span></div></div>
+        <div class="step"><div class="step-num solar">07</div><div class="step-text">Corrente CC de projeto (Isc × 1,25): ${isc}A × 1,25 = <span>${Icc_string.toFixed(2)}A/string</span> → Total: <span>${Icc_total.toFixed(2)}A</span></div></div>
+        <div class="step"><div class="step-num solar">08</div><div class="step-text">Cabo CC (painel→string box): <span>${caboCC} mm²</span> solar tipo dupla isolação UV — (NBR 16690)</div></div>
+        <div class="step"><div class="step-num solar">09</div><div class="step-text">Corrente CA (saída inversor): Ica = ${(PtotalInstalada*1000).toFixed(0)}W ÷ (220V × 0,95) = ${Ica.toFixed(2)}A → Ip = <span>${Ica_proj.toFixed(2)}A</span></div></div>
+        <div class="step"><div class="step-num solar">10</div><div class="step-text">Cabo CA (inversor→QD): <span>${caboCA} mm²</span> — Disjuntor CA: <span>${disjCA}A Curva C</span> (NBR 5410)</div></div>
+        <div class="step"><div class="step-num solar">11</div><div class="step-text">Fusível CC por string (gPV/curva gG): <span>${fusCC}A</span> por string — na string box (NBR 16690 / IEC 60269)</div></div>
+        <div class="step"><div class="step-num solar">12</div><div class="step-text">DPS CC Classe II: tensão mínima ≥ <span>${dpsCCTensao}V</span> (≥1,2 × Vmpp_string) — obrigatório na string box</div></div>
+      </div>
+
+      <div class="total-box solar" style="margin-top:16px;">
+        <div class="total-label">POTÊNCIA TOTAL INSTALADA</div>
+        <div class="total-value solar">${PtotalInstalada.toFixed(2)} kWp</div>
+        <div class="total-sub">${nModulos} módulos ${wpModulo}Wp | ${nStrings} string(s) × ${modulosPorString} módulos | Energia: ~${energiaGerada.toFixed(0)} kWh/mês</div>
+      </div>
+
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="fv-sumario">
+        <div class="result-box" style="border-color:var(--solar);margin-top:0;">
+          <div style="font-family:'Orbitron';font-size:11px;color:var(--solar);margin-bottom:8px;letter-spacing:2px;">CIRCUITO CC</div>
+          <div class="result-row"><span class="result-label">Cabo solar (dupla isolação)</span><span class="result-value solar">${caboCC} mm²</span></div>
+          <div class="result-row"><span class="result-label">Fusível por string (gPV)</span><span class="result-value solar">${fusCC} A</span></div>
+          <div class="result-row"><span class="result-label">DPS CC Classe II</span><span class="result-value solar">≥ ${dpsCCTensao} V</span></div>
+          <div class="result-row"><span class="result-label">Seccionador CC (LOTO)</span><span class="result-value solar">OBRIGATÓRIO</span></div>
+        </div>
+        <div class="result-box" style="border-color:var(--accent3);margin-top:0;">
+          <div style="font-family:'Orbitron';font-size:11px;color:var(--accent3);margin-bottom:8px;letter-spacing:2px;">CIRCUITO CA</div>
+          <div class="result-row"><span class="result-label">Cabo CA flexível</span><span class="result-value">${caboCA} mm²</span></div>
+          <div class="result-row"><span class="result-label">Disjuntor CA (Curva C)</span><span class="result-value">${disjCA} A</span></div>
+          <div class="result-row"><span class="result-label">DPS CA Classe III</span><span class="result-value">220 V</span></div>
+          <div class="result-row"><span class="result-label">DR 30mA (recomendado)</span><span class="result-value">40 A</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;" class="info-box solar">
+        ☀️ <strong style="color:var(--solar)">LISTA DE MATERIAIS FV — RESUMO:</strong><br>
+        • ${nModulos}× Módulo FV ${wpModulo}Wp (Voc: ${voc}V | Isc: ${isc}A)<br>
+        • 1× String Box com ${nStrings} entradas + fusíveis ${fusCC}A + DPS CC ≥${dpsCCTensao}V<br>
+        • 1× Inversor grid-tie ≥ ${PtotalInstalada.toFixed(1)} kWp (Vmax CC: ${vmaxInv}V | Imax MPPT: ${imaxMppt}A)<br>
+        • Cabos CC: ${caboCC}mm² solar (dupla isolação, UV, ≥120°C) — positivo e negativo<br>
+        • Cabo CA: ${caboCA}mm² flexível × 3 condutores (F+N+T)<br>
+        • 1× Disjuntor CA ${disjCA}A Curva C (inversor → QD)<br>
+        • Aterramento: cabo 10mm² verde-amarelo + haste copperweld (NBR 5410 / NBR 5419)
+      </div>
+
+      <div style="margin-top:12px;" class="info-box warn">
+        ⚠️ <strong>APROVAÇÃO ANEEL (REN 482/2012 / REN 687/2015):</strong><br>
+        • Solicitar aprovação à distribuidora antes de energizar o sistema<br>
+        • Instalar medidor bidirecional conforme exigência da distribuidora<br>
+        • Apresentar projeto com ART de engenheiro eletricista (CREA)<br>
+        • Laudos de conformidade do inversor (INMETRO) e dos módulos (IEC 61215/61730)
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = function() {
+  initAmbientes();
+  initEletros();
+};
+</script>
+</body>
+</html>

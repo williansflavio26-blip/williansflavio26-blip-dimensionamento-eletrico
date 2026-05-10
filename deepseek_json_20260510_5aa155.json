@@ -1,0 +1,21 @@
+{
+  "name": "Dimensionamento Elétrico - NBR 5410",
+  "short_name": "Dim Elétrico",
+  "description": "Ferramenta para cálculo de instalações elétricas conforme NBR 5410, NR-10, NR-12 e NBR 16690.",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#060a0f",
+  "background_color": "#060a0f",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
